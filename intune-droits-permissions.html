@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Intune — Gestion des droits et des permissions</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-read: #1f7a4d;
+    --tag-read-bg: #e6f5ec;
+    --tag-write: #a15c00;
+    --tag-write-bg: #fdf1de;
+    --tag-highpriv: #b5252f;
+    --tag-highpriv-bg: #fbe7e8;
+    --tag-scope: #7b3fd6;
+    --tag-scope-bg: #f1e9fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 {
+    font-size: 1.9rem;
+    margin: 0 0 6px;
+  }
+  header.title-block p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .num {
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  p { margin: 10px 0; }
+  .intro {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .lifecycle {
+    list-style: none;
+    margin: 18px 0;
+    padding: 0;
+    counter-reset: step;
+  }
+  .lifecycle li {
+    counter-increment: step;
+    position: relative;
+    padding: 14px 16px 14px 52px;
+    margin-bottom: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .lifecycle li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lifecycle li strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+  .lifecycle li span {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .focus-box {
+    background: var(--accent-soft);
+    border: 1px solid #c9dcfb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+  }
+  .focus-box strong { display: block; margin-bottom: 4px; }
+  .warn-box {
+    background: #fdf1de;
+    border: 1px solid #f3d9a6;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+  }
+  .warn-box strong { display: block; margin-bottom: 4px; color: var(--tag-write); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  table.compact th, table.compact td { font-size: 0.85rem; padding: 8px 10px; }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .table-scroll { overflow-x: auto; }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-read { color: var(--tag-read); background: var(--tag-read-bg); }
+  .tag-write { color: var(--tag-write); background: var(--tag-write-bg); }
+  .tag-highpriv { color: var(--tag-highpriv); background: var(--tag-highpriv-bg); }
+  .tag-scope { color: var(--tag-scope); background: var(--tag-scope-bg); }
+  .note {
+    font-size: 0.9rem;
+    color: var(--muted);
+    border-left: 3px solid var(--border);
+    padding: 8px 14px;
+    margin: 14px 0;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .service-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--card-bg);
+  }
+  .service-card h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .service-card p {
+    margin: 0;
+    font-size: 0.93rem;
+    color: var(--text);
+  }
+  .service-card p + p { margin-top: 8px; }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .flow .step {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+  }
+  .flow .arrow {
+    color: var(--muted);
+  }
+  .flow .plus {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title-block">
+    <h1>Microsoft Intune — Gestion des droits et des permissions</h1>
+    <p>Fiche de synthèse du chapitre « Gestion des droits et des permissions »</p>
+  </header>
+
+  <p class="intro">Ce chapitre répond à une question précise : une fois un appareil géré par Intune, qui a le droit de faire quoi, sur quoi, et pendant combien de temps ? Il pose d'abord le modèle RBAC et ses trois briques (rôle, balise d'étendue, groupe), détaille chaque brique, puis montre comment les assembler. Deux mécanismes complémentaires viennent ensuite renforcer ce socle : les unités d'administration (découpage structurel), puis PIM et l'approbation multi-admin, qui ajoutent respectivement une dimension temporelle et une validation collaborative.</p>
+
+  <div class="warn-box">
+    <strong>Le cas d'école qui justifie le chapitre</strong>
+    En juillet 2012, une banque australienne a été paralysée par l'application, sur les postes de travail, d'une mise à jour insuffisamment testée — déployée par un technicien qui n'aurait pas dû pouvoir cibler ces ressources. Microsoft Configuration Manager (l'ancêtre d'Intune) donne un accès complet aux ressources administrées : sans planification de la sécurité des droits, un outil de gestion devient un outil de destruction potentiel.
+  </div>
+
+  <h2><span class="num">1.</span>RBAC : le modèle et ses trois briques</h2>
+  <p>Le contrôle d'accès basé sur les rôles (Role-Based Access Control) a été proposé par Ferraiolo et Kuhn en 1992, validé par le NIST en 2004. Microsoft l'a introduit dès Windows XP / Server 2003 SP1 (API Authorization Manager), puis complété avec Exchange Server 2010. Le modèle Role-Based Administration de Microsoft Intune s'appuie sur trois briques :</p>
+
+  <div class="flow">
+    <span class="step">Groupe de sécurité<br><small>qui</small></span>
+    <span class="plus">+</span>
+    <span class="step">Rôle de sécurité<br><small>quelles actions</small></span>
+    <span class="plus">+</span>
+    <span class="step">Balise d'étendue<br><small>sur quoi</small></span>
+    <span class="arrow">=</span>
+    <span class="step">Assignment<br><small>droit réel</small></span>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Groupes <span class="tag tag-scope">Qui</span></h4>
+      <p>Les utilisateurs administratifs sont rassemblés dans un groupe de sécurité Microsoft Entra ID, qui obtient les permissions pour agir. La manipulation des groupes eux-mêmes (création, appartenance) reste régie par le RBAC natif d'Entra ID — les deux modèles se couplent selon les responsabilités.</p>
+    </div>
+    <div class="service-card">
+      <h4>Rôles de sécurité <span class="tag tag-write">Quelles actions</span></h4>
+      <p>Définissent un ensemble de permissions relatives à un périmètre de responsabilités et d'actions (lecture, modification, suppression, création, assignation, rapport, contrôle distant…).</p>
+    </div>
+    <div class="service-card">
+      <h4>Balises d'étendue (scope tags) <span class="tag tag-scope">Sur quoi</span></h4>
+      <p>Définissent quels objets (stratégies, profils, applications…) un administrateur peut voir. Associées au groupe et au rôle, elles délimitent le périmètre d'intervention.</p>
+    </div>
+  </div>
+
+  <p class="note">Point de licence : les administrateurs doivent théoriquement disposer d'une licence Intune pour accéder au centre d'administration. L'option <strong>Tenant administration → Roles → Administrator Licensing</strong> permet d'en dispenser les comptes purement administratifs.</p>
+
+  <h2><span class="num">2.</span>Rôles : deux niveaux</h2>
+  <p>On distingue les rôles définis par Microsoft Entra ID (portée large, transverse à tout le tenant) des rôles définis dans Microsoft Intune (portée fine, basée sur plus de 50 « classes » d'objets).</p>
+
+  <h3>Rôles Microsoft Entra ID relatifs à Intune</h3>
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Rôle</th><th>Portée</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Global Administrator</strong> <span class="tag tag-highpriv">Fort privilège</span></td><td>Accès complet, modification, sur l'ensemble des produits et services du tenant.</td></tr>
+      <tr><td><strong>Global Reader</strong> <span class="tag tag-read">Lecture</span></td><td>Même périmètre que Global Administrator, mais en lecture seule.</td></tr>
+      <tr><td><strong>Security Administrator</strong> <span class="tag tag-write">Modification</span></td><td>Accès en modification à l'ensemble des produits de sécurité (Defender, Identity Protection, Intune…).</td></tr>
+      <tr><td><strong>Security Operator</strong> / <strong>Security Reader</strong> <span class="tag tag-read">Lecture</span></td><td>Même périmètre sécurité, en lecture seule.</td></tr>
+      <tr><td><strong>Intune Administrator</strong> <span class="tag tag-highpriv">Fort privilège</span></td><td>Permissions globales sur le service Intune et tous ses objets (stratégies, profils, applications, appareils…).</td></tr>
+      <tr><td><strong>Windows 365 Administrator</strong></td><td>Provisionne et gère tous les aspects des Cloud PC.</td></tr>
+      <tr><td><strong>Windows Update Deployment Administrator</strong></td><td>Gère les déploiements Windows Update via Windows Update for Business Deployment Service (utile hors Intune, par Microsoft Graph ou avec des outils tiers).</td></tr>
+      <tr><td><strong>Edge Administrator</strong></td><td>Administre le service Edge dans le centre d'admin Microsoft 365 (stratégies, extensions, sites d'entreprise…).</td></tr>
+      <tr><td><strong>Office Apps Administrator</strong></td><td>Administre Microsoft Cloud Policy Service : stratégies Microsoft 365 Apps, rapports d'usage, mises à jour client.</td></tr>
+      <tr><td><strong>Printer Administrator</strong></td><td>Gère toutes les configurations d'imprimantes (Universal Print), consent aux demandes d'autorisation déléguées, accès aux rapports.</td></tr>
+      <tr><td><strong>Printer Technician</strong></td><td>Enregistre des imprimantes, gère leur état, lecture des connecteurs — ne peut pas définir les permissions ni le partage.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Liste complète des rôles Entra ID : <em>learn.microsoft.com/entra/identity/role-based-access-control/permissions-reference</em>.</p>
+
+  <h3>Rôles Microsoft Intune (basés sur des classes d'objets)</h3>
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Application Manager <span class="tag tag-write">Modification</span></h4>
+      <p>Gestion des applications mobiles et gérées. Lecture des informations sur les appareils et des profils de configuration. Peut éditer filtres et policy sets.</p>
+    </div>
+    <div class="service-card">
+      <h4>Endpoint Privilege Manager / Reader <span class="tag tag-scope">EPM</span></h4>
+      <p>Gère (ou lit, pour le rôle Reader) les stratégies et demandes d'élévation de la solution Endpoint Privilege Management.</p>
+    </div>
+    <div class="service-card">
+      <h4>Endpoint Security Manager <span class="tag tag-write">Modification</span></h4>
+      <p>Gère les Security Baselines, les stratégies Endpoint Security, la conformité des appareils, ainsi que l'EPM. Accès à des actions à distance liées à la sécurité (rotation de clé BitLocker…).</p>
+    </div>
+    <div class="service-card">
+      <h4>Help Desk Operator <span class="tag tag-scope">Actions à distance</span></h4>
+      <p>Actions à distance sur les appareils (synchronisation, effacement, localisation), prise en main via Remote Help, assignation d'applications créées par d'autres rôles. Lecture des configurations/apps/profils.</p>
+    </div>
+    <div class="service-card">
+      <h4>Intune Role Administrator <span class="tag tag-scope">Rôles uniquement</span></h4>
+      <p>Gère uniquement les permissions et rôles de la solution — ne voit ni les objets (stratégies, profils, apps) ni les appareils.</p>
+    </div>
+    <div class="service-card">
+      <h4>Policy and Profile Manager <span class="tag tag-write">Modification</span></h4>
+      <p>Gère profils et stratégies (configuration, conformité, enregistrement/tokens). Peut ajouter des identifiants de périphériques « corporate », lister les appareils, créer filtres et policy sets, gérer des applications.</p>
+    </div>
+    <div class="service-card">
+      <h4>Reader Only Operator <span class="tag tag-read">Lecture</span></h4>
+      <p>Droit de lecture sur l'ensemble des éléments du service Intune : utilisateurs, périphériques, configurations, applications.</p>
+    </div>
+    <div class="service-card">
+      <h4>School Administrator <span class="tag tag-scope">Éducation</span></h4>
+      <p>Rôle spécifique à Intune for Education : gestion des applications, des paramètres, actions à distance sur les appareils.</p>
+    </div>
+  </div>
+
+  <h3>Rôles Windows 365 et Windows Autopatch</h3>
+  <div class="table-scroll">
+  <table class="compact">
+    <thead>
+      <tr><th>Service</th><th>Rôle</th><th>Portée</th></tr>
+    </thead>
+    <tbody>
+      <tr><td rowspan="4">Windows 365</td><td>Cloud PC Administrator</td><td>Gère tous les aspects des Cloud PC : image système, connexions réseau Azure, provisionnement.</td></tr>
+      <tr><td>Cloud PC Reader</td><td>Lecture sur toutes les données du nœud Windows 365.</td></tr>
+      <tr><td>Network Interface Contributor</td><td>Autorisations minimales pour créer/joindre la NIC dans le groupe de ressources d'une connexion réseau Azure (ANC).</td></tr>
+      <tr><td>Network User</td><td>Autorisations minimales pour joindre la NIC au réseau virtuel de l'ANC.</td></tr>
+      <tr><td rowspan="2">Windows Autopatch</td><td>Autopatch Administrator</td><td>Gère groupes, demandes de support, messages et rapports Autopatch — pas les stratégies de mises à jour (requiert Policy and Profile Manager).</td></tr>
+      <tr><td>Autopatch Reader</td><td>Lecture sur toutes les données Windows Autopatch.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="warn-box">
+    <strong>Rôles prédéfinis vs rôles personnalisés</strong>
+    Les permissions des rôles intégrés ne peuvent pas être modifiées. Créer un rôle personnalisé impose de la gestion de changement : Microsoft n'ajoute pas automatiquement les nouvelles classes aux rôles créés soi-même. Recommandation générale : privilégier les rôles au niveau Intune pour appliquer le principe de moindre privilège du Zero Trust ; réserver le custom aux besoins que les rôles prédéfinis ne couvrent pas.
+  </div>
+
+  <h3>Créer un rôle personnalisé</h3>
+  <ol class="lifecycle">
+    <li><strong>Tenant administration → Roles → All roles</strong><span>Cliquer sur Create, puis Intune Role, Windows 365 Role ou Windows Autopatch role.</span></li>
+    <li><strong>Nom et description</strong><span>Identification du rôle.</span></li>
+    <li><strong>Classes et permissions</strong><span>Sélection des classes d'objets et des permissions associées.</span></li>
+    <li><strong>Balise d'étendue</strong><span>Configuration d'une balise d'étendue par défaut pour le rôle.</span></li>
+    <li><strong>Validation</strong><span>Création du rôle.</span></li>
+  </ol>
+
+  <h2><span class="num">3.</span>Balises d'étendue (scope tags)</h2>
+  <p>Elles définissent les objets (stratégies, tokens, applications…) que les administrateurs peuvent voir. Cas d'usage typiques : découpage par équipe (postes / mobiles / serveurs), par géographie (France, États-Unis…), ou par état d'approbation d'un objet (une application en cours de packaging porte une balise « équipe test », puis change de balise une fois prête pour l'équipe déploiement). Une balise par défaut s'applique automatiquement à tout objet non marqué qui prend en charge ce mécanisme.</p>
+
+  <ol class="lifecycle">
+    <li><strong>Tenant administration → Roles → Scope tags</strong><span>Cliquer sur Create.</span></li>
+    <li><strong>Nom et description</strong><span>Identification de la balise.</span></li>
+    <li><strong>Assignation à un groupe</strong><span>La balise s'applique au groupe et à tous les périphériques associés.</span></li>
+    <li><strong>Validation</strong><span>Création de la balise.</span></li>
+  </ol>
+  <p class="note">L'assignation effective d'une balise se fait ensuite lors de la création de chaque objet (stratégie, application…) qui supporte ce mécanisme.</p>
+
+  <h2><span class="num">4.</span>Assigner des droits</h2>
+  <p>Une fois rôles, balises d'étendue et groupes créés, l'assemblage se fait via <strong>Tenant administration → Roles → All Roles</strong>, en sélectionnant le rôle puis <strong>Manage → Assignments → Assign</strong> :</p>
+  <ol class="lifecycle">
+    <li><strong>Nom et description de l'assignation</strong><span>Identification de l'assignation.</span></li>
+    <li><strong>Groupe des administrateurs</strong><span>Qui reçoit ce rôle.</span></li>
+    <li><strong>Groupe(s) cible(s)</strong><span>Utilisateurs et/ou périphériques sur lesquels ces administrateurs peuvent intervenir — possibilité de cibler tous les utilisateurs/périphériques.</span></li>
+    <li><strong>Balise(s) d'étendue</strong><span>Balise par défaut (accès à tous les objets) ou balise personnalisée selon le modèle de délégation.</span></li>
+    <li><strong>Validation</strong><span>Résumé puis assignation. À répéter pour construire le modèle complet, aligné sur la matrice RACI de l'organisation.</span></li>
+  </ol>
+
+  <h2><span class="num">5.</span>Unités d'administration</h2>
+  <p>Les unités d'administration (admin units) créent des divisions logiques dans l'annuaire — départements, régions, équipes projet — particulièrement utiles dans les grandes entreprises. Chaque unité peut avoir ses propres administrateurs, avec une gestion plus ciblée : par exemple, un responsable local de pays peut gérer les accès de son périmètre sans validation centralisée. Une unité d'administration comprend :</p>
+  <ul>
+    <li>Ses propriétés (membres assignés ou calculés dynamiquement, sur base d'utilisateurs ou de périphériques)</li>
+    <li>Les utilisateurs membres</li>
+    <li>Les groupes membres associés</li>
+    <li>Les périphériques associés</li>
+    <li>Les rôles et administrateurs à droits périmétrés à cette unité (tous les rôles Entra ne sont pas éligibles — surtout des rôles de gestion quotidienne : groupes, utilisateurs, périphériques, mots de passe, authentification)</li>
+  </ul>
+  <p class="note">Mécanisme complémentaire au RBAC Intune, plutôt qu'un remplacement — pertinent quand rôles et responsabilités sont déjà bien établis dans l'organisation.</p>
+
+  <h2><span class="num">6.</span>Privileged Identity Management (PIM)</h2>
+  <p>Service Entra ID qui ajoute la dimension <strong>temps</strong> au modèle : accès juste-à-temps (Just-in-Time) aux opérations critiques plutôt qu'un droit permanent. Couvre Entra ID, Azure et Intune. Licence requise : <strong>Entra ID P2</strong> ou <strong>Entra ID Governance</strong>. Utilisable sur les rôles Entra ID, mais aussi sur des groupes de sécurité cloud porteurs d'un rôle Intune.</p>
+
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Eligible <span class="tag tag-read">Bonne pratique</span></h4>
+      <p>L'utilisateur peut demander les droits, mais ne les a pas d'office — il doit les activer.</p>
+    </div>
+    <div class="service-card">
+      <h4>Active <span class="tag tag-write">Droit permanent</span></h4>
+      <p>L'utilisateur a les droits dès sa connexion au portail.</p>
+    </div>
+  </div>
+  <p class="note">Attribution permanente ou limitée dans le temps (date de début/fin, maximum un an).</p>
+
+  <h3>Mise en œuvre — rôles Microsoft Entra</h3>
+  <ol class="lifecycle">
+    <li><strong>Identity Governance → Privileged Identity Management → Manage → Microsoft Entra Roles</strong><span>Sélectionner le rôle cible, ex. Intune Administrator.</span></li>
+    <li><strong>Assignments → Add assignments</strong><span>Associer des utilisateurs directement, ou via un groupe Microsoft 365.</span></li>
+    <li><strong>Type d'assignation</strong><span>Eligible ou Active, avec durée permanente ou limitée.</span></li>
+  </ol>
+
+  <h3>Mise en œuvre — groupes porteurs d'un rôle Intune</h3>
+  <ol class="lifecycle">
+    <li><strong>Groups → Discover Groups</strong><span>Sélectionner le groupe auquel un rôle Intune a été assigné, puis Manage groups.</span></li>
+    <li><strong>Assignments → Add assignments</strong><span>Associer des utilisateurs directement ou via un groupe de sécurité ; sélectionner le rôle Member.</span></li>
+    <li><strong>Type d'assignation</strong><span>Eligible ou Active, comme pour les rôles Entra.</span></li>
+  </ol>
+  <p class="note">L'espace <strong>Settings</strong> (rôles ou groupes) permet de configurer les paramètres d'activation (justification, approbateurs, durée), d'assignation (expiration de l'éligibilité) et de notifications.</p>
+
+  <h2><span class="num">7.</span>Approbation multi-admin (MAA)</h2>
+  <p>Le Multi Admin Approval ajoute une couche de <strong>validation collaborative</strong> : les actions critiques spécifiques doivent recevoir l'aval de plusieurs administrateurs avant exécution, réduisant le risque lié à un compte administrateur compromis agissant seul.</p>
+  <p>Mise en place : définir qui peut créer/approuver les politiques MAA, formaliser une politique d'accès (matrice RACI) listant les actions concernées, puis faire vivre le cycle demande → approbation → exécution.</p>
+
+  <ol class="lifecycle">
+    <li><strong>Tenant administration → Multi Admin Approval → Access Policy → Create</strong><span>La vue liste aussi toutes les demandes et celles de l'utilisateur connecté.</span></li>
+    <li><strong>Nom, description, type de profil</strong><span>Ex. Script, Applications.</span></li>
+    <li><strong>Plateformes concernées</strong><span>Windows uniquement, et/ou plateformes non Windows.</span></li>
+    <li><strong>Groupe d'approbateurs</strong><span>Utilisateurs habilités à approuver les actions.</span></li>
+    <li><strong>Soumission pour approbation</strong><span>La stratégie d'accès elle-même doit être validée par un autre administrateur avant d'être active.</span></li>
+  </ol>
+
+  <h2><span class="num">8.</span>Grille de lecture transverse</h2>
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Mécanisme</th><th>Répond à</th><th>Type de contrôle</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>RBAC (rôle + balise + groupe)</td><td>Qui peut faire quoi, sur quoi</td><td>Modèle statique de base</td></tr>
+      <tr><td>Unités d'administration</td><td>Comment découper l'annuaire par équipe/région</td><td>Structurel (Entra ID)</td></tr>
+      <tr><td>PIM</td><td>Le droit est-il actif en permanence ou seulement à la demande</td><td>Temporel (Just-in-Time)</td></tr>
+      <tr><td>Approbation multi-admin</td><td>Une seule personne peut-elle exécuter une action critique seule</td><td>Collaboratif (double validation)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Retenir en une phrase : le RBAC pose le socle statique (rôle + balise d'étendue + groupe) ; les unités d'administration offrent un découpage structurel alternatif ; PIM et l'approbation multi-admin ne remplacent rien, ils ajoutent respectivement une couche temporelle et une couche de validation humaine par-dessus ce socle.</p>
+
+  <footer>
+    Fiche de synthèse basée sur le chapitre « Gestion des droits et des permissions » (Aperçu et fondamentaux).
+  </footer>
+
+</div>
+</body>
+</html>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

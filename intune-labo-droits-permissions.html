@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labo Intune — Droits et permissions (RBAC)</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-read: #1f7a4d;
+    --tag-read-bg: #e6f5ec;
+    --tag-write: #a15c00;
+    --tag-write-bg: #fdf1de;
+    --tag-highpriv: #b5252f;
+    --tag-highpriv-bg: #fbe7e8;
+    --tag-scope: #7b3fd6;
+    --tag-scope-bg: #f1e9fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 { font-size: 1.9rem; margin: 0 0 6px; }
+  header.title-block p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  h2 .num { color: var(--accent); margin-right: -4px; }
+  h3 { font-size: 1.05rem; margin-top: 28px; margin-bottom: 10px; color: var(--text); }
+  h4.ex-title { margin: 0 0 4px; font-size: 1.05rem; }
+  p { margin: 10px 0; }
+  .intro { color: var(--muted); font-size: 0.95rem; }
+  .exercise {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    background: var(--card-bg);
+  }
+  .exercise .ref {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
+  }
+  .goal {
+    background: var(--accent-soft);
+    border: 1px solid #c9dcfb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.93rem;
+  }
+  .goal strong { color: var(--accent); }
+  .lifecycle {
+    list-style: none;
+    margin: 14px 0;
+    padding: 0;
+    counter-reset: step;
+  }
+  .lifecycle li {
+    counter-increment: step;
+    position: relative;
+    padding: 12px 14px 12px 48px;
+    margin-bottom: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.93rem;
+  }
+  .lifecycle li::before {
+    content: counter(step);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lifecycle li strong { display: block; margin-bottom: 2px; }
+  .lifecycle li span.detail { color: var(--muted); font-size: 0.88rem; }
+  .result {
+    border-left: 3px solid var(--tag-read);
+    background: var(--tag-read-bg);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  .result strong { display: block; color: var(--tag-read); margin-bottom: 2px; }
+  .warn-box {
+    background: #fdf1de;
+    border: 1px solid #f3d9a6;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 0.9rem;
+  }
+  .warn-box strong { display: block; margin-bottom: 4px; color: var(--tag-write); }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 6px;
+  }
+  .tag-read { color: var(--tag-read); background: var(--tag-read-bg); }
+  .tag-write { color: var(--tag-write); background: var(--tag-write-bg); }
+  .tag-highpriv { color: var(--tag-highpriv); background: var(--tag-highpriv-bg); }
+  .tag-scope { color: var(--tag-scope); background: var(--tag-scope-bg); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .table-scroll { overflow-x: auto; }
+  .note { font-size: 0.9rem; color: var(--muted); border-left: 3px solid var(--border); padding: 8px 14px; margin: 14px 0; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .exercise code { background: var(--bg); }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title-block">
+    <h1>Labo Intune — Droits et permissions (RBAC)</h1>
+    <p>Mise en pratique du chapitre « Gestion des droits et des permissions » sur un tenant réel</p>
+  </header>
+
+  <p class="intro">Scénario : vous mettez en place une délégation Helpdesk limitée aux postes Windows d'un site fictif « Paris », sans droit sur les serveurs ni les autres sites — le cas d'usage RACI que le chapitre appelle de ses vœux. Chaque exercice ci-dessous reprend une section précise de la fiche de cours et se termine par une vérification concrète, sans avoir besoin de vous reconnecter avec le compte test.</p>
+
+  <div class="warn-box">
+    <strong>Prérequis à vérifier avant de commencer</strong>
+    Licence Intune sur votre compte admin (Business Premium suffit pour les exercices 1 à 6). L'exercice 7 (PIM) exige <strong>Entra ID P2</strong> ou <strong>Entra ID Governance</strong> — vérifiez dans <em>Entra ID → Licenses</em>. L'exercice 8 (Multi-Admin Approval) fait partie d'<strong>Intune Suite</strong> — s'il est grisé, traitez-le en observation plutôt qu'en exécution. Tenant utilisé : <code>NextstepPRO.onmicrosoft.com</code> (ou votre tenant de pratique).
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 1 — RBAC : le modèle et ses trois briques</span>
+    <h4 class="ex-title">Exercice 1 — Créer les deux groupes de base <span class="tag tag-scope">Qui</span></h4>
+    <div class="goal"><strong>But :</strong> matérialiser concrètement les deux rôles que joue un groupe de sécurité dans le modèle — porteur de droits (le groupe d'admins) et cible de ces droits (le groupe de ressources).</div>
+    <ol class="lifecycle">
+      <li><strong>Entra ID → Groups → New group</strong><span class="detail">Type : Security. Nom : <code>SG-Helpdesk-Paris</code>. Description : « Administrateurs Helpdesk périmètre Paris ».</span></li>
+      <li><strong>Entra ID → Users → New user</strong><span class="detail">Nom d'affichage : Test Helpdesk 1. Identifiant : <code>test.helpdesk1@NextstepPRO.onmicrosoft.com</code>. Pas de licence M365 nécessaire à ce stade.</span></li>
+      <li><strong>Ajouter le membre</strong><span class="detail">Retournez sur <code>SG-Helpdesk-Paris</code> → Members → Add members → <code>test.helpdesk1</code>.</span></li>
+      <li><strong>Créer le second groupe</strong><span class="detail">New group → Security → Nom : <code>SG-Devices-Paris</code> → Description : « Postes Windows du site Paris ». Membres assignés vides pour l'instant (on y reviendra à l'exercice 5 si vous avez un appareil de test).</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>Deux groupes visibles dans Entra ID → Groups, <code>SG-Helpdesk-Paris</code> contenant un membre (<code>test.helpdesk1</code>), <code>SG-Devices-Paris</code> vide ou avec un appareil de test.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 2 — Rôles : deux niveaux</span>
+    <h4 class="ex-title">Exercice 2 — Lire un rôle intégré, puis en cloner un <span class="tag tag-write">Quelles actions</span></h4>
+    <div class="goal"><strong>But :</strong> comprendre la granularité réelle d'un rôle Intune (classes d'objets × permissions) avant d'en construire un sur mesure.</div>
+    <ol class="lifecycle">
+      <li><strong>Intune → Tenant administration → Roles → All roles</strong><span class="detail">Ouvrez <strong>Help Desk Operator</strong> → onglet Manage → Permissions. Repérez au moins 3 classes d'objets (ex. Managed devices, Remote tasks, Managed apps) et notez ce qui est coché (Read/Update/Delete…).</span></li>
+      <li><strong>Créer un rôle personnalisé</strong><span class="detail">All roles → Create → Intune Role. Nom : <code>Helpdesk-Paris-Limite</code>. Description : « Helpdesk Paris, sans verrouillage/effacement à distance ».</span></li>
+      <li><strong>Copier les permissions</strong><span class="detail">Dans l'assistant, section Permissions : reproduisez celles de Help Desk Operator pour Managed devices et Remote tasks, mais décochez explicitement <em>Remote lock</em> et <em>Wipe</em>.</span></li>
+      <li><strong>Balise d'étendue par défaut</strong><span class="detail">Laissez « Default » à cette étape (l'exercice 3 en créera une dédiée).</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong><code>Helpdesk-Paris-Limite</code> apparaît dans All roles avec la mention « Custom ». Comparez son résumé de permissions à celui de Help Desk Operator : la différence doit se limiter à Remote lock/Wipe.</div>
+    <p class="note">Rappel du cours : les rôles intégrés ne se modifient pas — c'est pour ça qu'on clone plutôt que d'éditer Help Desk Operator directement.</p>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 3 — Balises d'étendue (scope tags)</span>
+    <h4 class="ex-title">Exercice 3 — Créer et assigner une balise <span class="tag tag-scope">Sur quoi</span></h4>
+    <div class="goal"><strong>But :</strong> délimiter visuellement et fonctionnellement le périmètre « Paris » avant de l'utiliser dans l'assignment.</div>
+    <ol class="lifecycle">
+      <li><strong>Tenant administration → Roles → Scope tags → Create</strong><span class="detail">Nom : <code>Paris</code>. Description : « Objets rattachés au site Paris ».</span></li>
+      <li><strong>Assignation à un groupe</strong><span class="detail">À l'étape Assign de l'assistant, sélectionnez <code>SG-Devices-Paris</code> — la balise s'appliquera à ce groupe et aux appareils qui lui sont associés.</span></li>
+      <li><strong>Valider</strong><span class="detail">La balise <code>Paris</code> doit apparaître dans la liste Scope tags avec 1 assignment.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>La balise <code>Paris</code> existe et est assignée à <code>SG-Devices-Paris</code>. Elle n'est pas encore appliquée à un objet précis (stratégie, appli…) — c'est normal, ça se fait objet par objet à la création.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 4 — Assigner des droits</span>
+    <h4 class="ex-title">Exercice 4 — Assembler les trois briques <span class="tag tag-highpriv">Droit réel</span></h4>
+    <div class="goal"><strong>But :</strong> produire le « droit réel » du modèle — l'assignment est le seul endroit où groupe, rôle et balise se rencontrent effectivement.</div>
+    <ol class="lifecycle">
+      <li><strong>All roles → Helpdesk-Paris-Limite → Manage → Assignments → Assign</strong><span class="detail">Nom de l'assignment : <code>Helpdesk-Paris</code>.</span></li>
+      <li><strong>Groupe des administrateurs</strong><span class="detail"><code>SG-Helpdesk-Paris</code> — qui reçoit ce rôle.</span></li>
+      <li><strong>Groupe(s) cible(s)</strong><span class="detail"><code>SG-Devices-Paris</code> — sur quoi ces administrateurs peuvent intervenir.</span></li>
+      <li><strong>Balise(s) d'étendue</strong><span class="detail"><code>Paris</code> plutôt que Default — c'est ce qui garantit que même si le groupe cible s'élargit un jour, seuls les objets tagués Paris resteront visibles.</span></li>
+      <li><strong>Valider</strong><span class="detail">Vérifiez le résumé avant de confirmer : rôle, groupe admin, groupe cible et balise doivent tous les quatre apparaître.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu — vérification sans reconnexion</strong>Intune → Troubleshooting + support → recherchez <code>test.helpdesk1</code> → onglet <em>Assigned roles</em> : <code>Helpdesk-Paris-Limite</code> doit apparaître, scopé à <code>Paris</code>.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 1 (note licence)</span>
+    <h4 class="ex-title">Exercice 5 — Dispenser le compte test de licence Intune</h4>
+    <div class="goal"><strong>But :</strong> vérifier concrètement le mécanisme d'exemption mentionné en note du chapitre, pour ne pas consommer une licence sur un compte purement administratif.</div>
+    <ol class="lifecycle">
+      <li><strong>Tenant administration → Roles → Administrator Licensing</strong><span class="detail">Ajoutez <code>test.helpdesk1</code> à la liste des comptes exemptés.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong><code>test.helpdesk1</code> garde l'accès au centre d'administration Intune sans qu'une licence Intune/M365 lui soit assignée.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 5 — Unités d'administration</span>
+    <h4 class="ex-title">Exercice 6 — Créer une unité d'administration et comparer au scope tag <span class="tag tag-scope">Structurel</span></h4>
+    <div class="goal"><strong>But :</strong> expérimenter la différence entre les deux mécanismes de découpage — la balise d'étendue scope des <em>objets Intune</em>, l'unité d'administration scope l'<em>annuaire Entra ID</em> (utilisateurs, mots de passe, authentification).</div>
+    <ol class="lifecycle">
+      <li><strong>Entra ID → Roles &amp; admins → Administrative units → New</strong><span class="detail">Nom : <code>AU-Paris</code>.</span></li>
+      <li><strong>Ajouter des membres</strong><span class="detail">Onglet Groups → Add → <code>SG-Devices-Paris</code> (si votre tenant permet d'y ajouter des groupes de périphériques ; sinon ajoutez <code>test.helpdesk1</code> comme utilisateur membre pour l'exercice).</span></li>
+      <li><strong>Assigner un rôle scopé à l'unité</strong><span class="detail">Onglet Roles and administrators → Add assignments → un rôle éligible (ex. Helpdesk Administrator, Password Administrator) → <code>SG-Helpdesk-Paris</code>.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong><code>AU-Paris</code> existe avec ses membres et un rôle Entra scopé. Notez que ce rôle Entra ne vous a rien donné sur les objets Intune — c'est un mécanisme parallèle au RBAC Intune, pas un remplacement.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 6 — Privileged Identity Management (PIM)</span>
+    <h4 class="ex-title">Exercice 7 — Rendre un accès éligible plutôt que permanent <span class="tag tag-write">Just-in-Time</span></h4>
+    <div class="goal"><strong>But :</strong> transformer un droit permanent (Active) en droit à la demande (Eligible), la dimension « temps » qu'introduit PIM.</div>
+    <div class="warn-box"><strong>Licence requise</strong>Entra ID P2 ou Entra ID Governance. Si <em>Identity Governance → PIM</em> n'apparaît pas ou renvoie une erreur de licence, passez cet exercice et notez-le « à refaire » dans votre carnet de suivi.</div>
+    <ol class="lifecycle">
+      <li><strong>Identity Governance → Privileged Identity Management → Manage → Groups</strong><span class="detail">Discover groups → sélectionnez <code>SG-Helpdesk-Paris</code> (le groupe porteur du rôle Intune) → Manage groups.</span></li>
+      <li><strong>Assignments → Add assignments</strong><span class="detail">Rôle Member → utilisateur <code>test.helpdesk1</code> (ou un groupe).</span></li>
+      <li><strong>Type d'assignation</strong><span class="detail">Choisissez <strong>Eligible</strong>, durée maximale 8 heures.</span></li>
+      <li><strong>Settings → Member role</strong><span class="detail">Activez « Require justification on activation » et « Require approval » avec un approbateur désigné.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong><code>test.helpdesk1</code> n'a plus d'accès permanent au groupe (donc au rôle Helpdesk-Paris-Limite) : il devrait devoir en faire la demande via My Access / PIM avant que le droit ne s'active, pour une durée limitée.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 7 — Approbation multi-admin (MAA)</span>
+    <h4 class="ex-title">Exercice 8 — Observer (ou mettre en place) une double validation <span class="tag tag-highpriv">Collaboratif</span></h4>
+    <div class="goal"><strong>But :</strong> comprendre le cycle demande → approbation → exécution, même si votre licence ne permet pas d'aller jusqu'au bout.</div>
+    <ol class="lifecycle">
+      <li><strong>Tenant administration → Multi Admin Approval → Access Policy → Create</strong><span class="detail">Si le menu est grisé ou absent : c'est qu'Intune Suite n'est pas dans votre licence — documentez le principe ci-dessous sans exécuter.</span></li>
+      <li><strong>Nom, description, type de profil</strong><span class="detail">Ex. <code>MAA-Scripts-Critiques</code>, type de profil : Script.</span></li>
+      <li><strong>Plateformes concernées</strong><span class="detail">Windows uniquement, pour cet exercice.</span></li>
+      <li><strong>Groupe d'approbateurs</strong><span class="detail"><code>SG-Helpdesk-Paris</code> ne devrait <em>pas</em> être approbateur de ses propres actions — créez plutôt un groupe distinct <code>SG-Approbateurs-Securite</code> si vous allez au bout.</span></li>
+      <li><strong>Soumission pour approbation</strong><span class="detail">La politique elle-même doit être validée par un autre administrateur avant de devenir active — notez cette exigence même si vous ne pouvez pas la tester matériellement.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>Soit une politique MAA active et en attente de validation, soit — si la fonctionnalité n'est pas disponible — une note claire dans votre carnet expliquant le cycle en 3 temps (demande/approbation/exécution) et pourquoi une seule personne ne doit jamais être à la fois demandeur et approbateur.</div>
+  </div>
+
+  <h2><span class="num">✓</span>Nettoyage</h2>
+  <p>Avant de refermer le labo, supprimez les objets créés — sinon ils polluent le tenant pour les prochaines sessions.</p>
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Objet</th><th>Emplacement</th></tr></thead>
+    <tbody>
+      <tr><td><code>test.helpdesk1</code></td><td>Entra ID → Users</td></tr>
+      <tr><td><code>SG-Helpdesk-Paris</code>, <code>SG-Devices-Paris</code></td><td>Entra ID → Groups</td></tr>
+      <tr><td><code>Helpdesk-Paris-Limite</code></td><td>Intune → Tenant administration → Roles → All roles</td></tr>
+      <tr><td>Balise <code>Paris</code></td><td>Intune → Tenant administration → Roles → Scope tags</td></tr>
+      <tr><td>Assignment <code>Helpdesk-Paris</code></td><td>Supprimé automatiquement avec le rôle personnalisé</td></tr>
+      <tr><td><code>AU-Paris</code></td><td>Entra ID → Roles &amp; admins → Administrative units</td></tr>
+      <tr><td>Politique <code>MAA-Scripts-Critiques</code> (si créée)</td><td>Intune → Tenant administration → Multi Admin Approval</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2><span class="num">📋</span>Checklist de validation</h2>
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>#</th><th>Exercice</th><th>Fait ?</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Groupes SG-Helpdesk-Paris / SG-Devices-Paris créés</td><td>☐</td></tr>
+      <tr><td>2</td><td>Rôle personnalisé cloné et comparé à Help Desk Operator</td><td>☐</td></tr>
+      <tr><td>3</td><td>Balise Paris créée et assignée</td><td>☐</td></tr>
+      <tr><td>4</td><td>Assignment complet vérifié via Troubleshooting + support</td><td>☐</td></tr>
+      <tr><td>5</td><td>Exemption de licence appliquée</td><td>☐</td></tr>
+      <tr><td>6</td><td>Unité d'administration créée et comparée au scope tag</td><td>☐</td></tr>
+      <tr><td>7</td><td>PIM testé (ou noté « à refaire » si P2 indisponible)</td><td>☐</td></tr>
+      <tr><td>8</td><td>MAA observé ou mis en place</td><td>☐</td></tr>
+      <tr><td>9</td><td>Nettoyage effectué</td><td>☐</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <footer>
+    Labo pratique construit sur la fiche « Gestion des droits et des permissions ». À faire sur un tenant de test, jamais en production.
+  </footer>
+
+</div>
+</body>
+</html>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Intune — Sécurité et conformité des appareils</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-perso: #1f7a4d;
+    --tag-perso-bg: #e6f5ec;
+    --tag-corp: #a15c00;
+    --tag-corp-bg: #fdf1de;
+    --tag-legacy: #6a6f7a;
+    --tag-legacy-bg: #f0f1f3;
+    --tag-mixte: #7b3fd6;
+    --tag-mixte-bg: #f1e9fc;
+    --code-bg: #f3f3f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14161c;
+      --text: #e7e9ef;
+      --muted: #9aa2b1;
+      --accent: #6d9bff;
+      --accent-soft: #1c2a48;
+      --border: #2b2f3a;
+      --card-bg: #1b1e26;
+      --tag-perso: #57d492;
+      --tag-perso-bg: #123322;
+      --tag-corp: #e0a34a;
+      --tag-corp-bg: #3a2a0f;
+      --tag-legacy: #a7adb8;
+      --tag-legacy-bg: #262a33;
+      --tag-mixte: #b98bf5;
+      --tag-mixte-bg: #2a1f3d;
+      --code-bg: #20232c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161c;
+    --text: #e7e9ef;
+    --muted: #9aa2b1;
+    --accent: #6d9bff;
+    --accent-soft: #1c2a48;
+    --border: #2b2f3a;
+    --card-bg: #1b1e26;
+    --tag-perso: #57d492;
+    --tag-perso-bg: #123322;
+    --tag-corp: #e0a34a;
+    --tag-corp-bg: #3a2a0f;
+    --tag-legacy: #a7adb8;
+    --tag-legacy-bg: #262a33;
+    --tag-mixte: #b98bf5;
+    --tag-mixte-bg: #2a1f3d;
+    --code-bg: #20232c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 {
+    font-size: 1.9rem;
+    margin: 0 0 6px;
+  }
+  header.title-block p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  h2 .num {
+    color: var(--accent);
+    margin-right: -4px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  p { margin: 10px 0; }
+  .intro {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .focus-box {
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+  }
+  .focus-box strong { display: block; margin-bottom: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  table.compact th, table.compact td { font-size: 0.85rem; padding: 8px 10px; }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .table-scroll { overflow-x: auto; }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-perso { color: var(--tag-perso); background: var(--tag-perso-bg); }
+  .tag-corp { color: var(--tag-corp); background: var(--tag-corp-bg); }
+  .tag-legacy { color: var(--tag-legacy); background: var(--tag-legacy-bg); }
+  .tag-mixte { color: var(--tag-mixte); background: var(--tag-mixte-bg); }
+  /* Stage badges: same three colors reused consistently for Protéger / Vérifier / Contrôler,
+     so the reader learns to associate a color with a stage across the whole document. */
+  .tag-protect { color: var(--accent); background: var(--accent-soft); }
+  .tag-verify  { color: var(--tag-perso); background: var(--tag-perso-bg); }
+  .tag-control { color: var(--tag-mixte); background: var(--tag-mixte-bg); }
+  .note {
+    font-size: 0.9rem;
+    color: var(--muted);
+    border-left: 3px solid var(--border);
+    padding: 8px 14px;
+    margin: 14px 0;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .service-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--card-bg);
+  }
+  .service-card.stage-protect { border-left: 3px solid var(--accent); }
+  .service-card.stage-verify  { border-left: 3px solid var(--tag-perso); }
+  .service-card.stage-control { border-left: 3px solid var(--tag-mixte); }
+  .service-card h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .service-card p {
+    margin: 0;
+    font-size: 0.93rem;
+    color: var(--text);
+  }
+  .service-card p + p { margin-top: 8px; }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .flow .step {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+  }
+  .flow .step.protect { color: var(--accent); border-color: var(--accent); }
+  .flow .step.verify  { color: var(--tag-perso); border-color: var(--tag-perso); }
+  .flow .step.control { color: var(--tag-mixte); border-color: var(--tag-mixte); }
+  .flow .arrow {
+    color: var(--muted);
+  }
+  code, .code-block {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.82rem;
+  }
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 10px 0;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text);
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title-block">
+    <h1>Microsoft Intune — Sécurité et conformité des appareils</h1>
+    <p>Fiche de synthèse du chapitre « Sécurité et conformité » — un seul fil conducteur du général au particulier</p>
+  </header>
+
+  <p class="intro">La menace n'entre presque jamais par le réseau : ce sont les postes, les serveurs et désormais les mobiles qui la propagent. La question posée par ce chapitre est donc simple à énoncer et difficile à tenir : comment s'assurer qu'aucun appareil accédant aux ressources de l'organisation, quel que soit son système d'exploitation, ne devienne une porte d'entrée pour un attaquant ou un canal de fuite de données — sans bloquer l'activité des utilisateurs ? Tous les mécanismes de ce chapitre, du firewall Windows aux stratégies de conformité Android, répondent en réalité à une seule et même logique en trois temps.</p>
+
+  <h2><span class="num">1.</span>Le fil conducteur</h2>
+  <div class="flow">
+    <span class="step protect">PROTÉGER</span><span class="arrow">→</span>
+    <span class="step verify">VÉRIFIER</span><span class="arrow">→</span>
+    <span class="step control">CONTRÔLER</span>
+  </div>
+  <div class="services-grid">
+    <div class="service-card stage-protect">
+      <h4>Protéger <span class="tag tag-protect">Sécurité</span></h4>
+      <p>Réduire la surface d'attaque de l'appareil et détecter/neutraliser les menaces : antivirus, firewall, chiffrement, navigation sécurisée, durcissement, gestion des privilèges et de l'identité.</p>
+    </div>
+    <div class="service-card stage-verify">
+      <h4>Vérifier <span class="tag tag-verify">Conformité</span></h4>
+      <p>Mesurer si l'état réel de l'appareil correspond à l'état attendu, défini dans un référentiel. C'est le rôle des stratégies de conformité Intune.</p>
+    </div>
+    <div class="service-card stage-control">
+      <h4>Contrôler <span class="tag tag-control">Accès conditionnel</span></h4>
+      <p>Conditionner l'accès aux ressources de l'organisation au résultat des deux étages précédents, via Microsoft Entra ID.</p>
+    </div>
+  </div>
+  <p class="note">Ce triptyque se retrouve à l'identique que l'appareil soit un ordinateur ou un mobile, qu'il soit géré de façon traditionnelle (Active Directory, Configuration Manager) ou moderne (Intune, Defender for Endpoint). Seuls les outils changent, jamais la logique — c'est le repère à retenir pour reconstituer tout le chapitre.</p>
+
+  <h2><span class="num">2.</span>Sécurité et conformité : deux notions à distinguer</h2>
+  <div class="services-grid">
+    <div class="service-card stage-protect">
+      <h4>Sécurité <span class="tag tag-protect">L'objectif</span></h4>
+      <p>L'ensemble des mesures techniques et organisationnelles, préventives et réactives, qui protègent la confidentialité, l'intégrité et la disponibilité (DIC) des systèmes et des données. Un antivirus, un firewall, un chiffrement de disque agissent directement sur le risque.</p>
+    </div>
+    <div class="service-card stage-verify">
+      <h4>Conformité <span class="tag tag-verify">La mesure</span></h4>
+      <p>La vérification qu'un état observé (la configuration réelle d'un appareil) correspond à un état attendu, défini dans un référentiel interne ou réglementaire. La conformité ne protège rien par elle-même ; elle constate un écart, ou son absence.</p>
+    </div>
+  </div>
+  <div class="focus-box">
+    <strong>Le point commun : nécessaire, mais non suffisant</strong>
+    Un appareil conforme à l'instant T peut être compromis l'instant d'après par une menace que le référentiel ne testait pas. La conformité doit donc être couplée à une solution de détection continue comme Microsoft Defender for Endpoint (MDE) — dont le niveau de risque peut lui-même devenir un critère de conformité. Les deux mécanismes se nourrissent l'un l'autre : c'est cette articulation qui structure tout le chapitre.
+  </div>
+
+  <h2><span class="num">3.</span>Deux modes de gestion</h2>
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Mode</th><th>Principe</th><th>Cas typique</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Traditionnel</strong></td><td>Appareil joint à Active Directory, piloté par stratégies de groupe, ou géré par Microsoft Configuration Manager.</td><td>Parc historique, postes non cloud-natifs</td></tr>
+      <tr><td><strong>Moderne</strong></td><td>Appareil enregistré et géré par Microsoft Intune, ou seulement intégré à Microsoft Defender for Endpoint sans être géré par Intune.</td><td>Postes cloud-natifs ; serveurs, filiales, postes non gérés côté MDE</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">C'est la seconde voie qui est détaillée dans ce chapitre. Trois prérequis pour piloter la sécurité via MDE seul : accès au point de terminaison <code>*.dm.microsoft.com</code>, version d'OS supportée, licence adaptée (Defender for Endpoint Plan 1/2/Business, ou Defender for Servers). Le connecteur MDE/Intune (portail Defender → System - Settings - Endpoints → Microsoft Intune Connection) partage ensuite les signaux de risque utilisés à l'étage Vérifier.</p>
+  <p class="note">Repère de configuration : en 2023, Microsoft a migré les stratégies héritées vers le <strong>settings catalog</strong>. Trois voies coexistent : une stratégie settings catalog (paramètres précis), une stratégie <strong>Endpoint Security</strong> (regroupe un thème de sécurité complet — la voie retenue ici), ou une <strong>Security Baseline</strong> (socle transverse de valeurs recommandées).</p>
+
+  <h2><span class="num">4.</span>Étage Protéger — ordinateurs et serveurs <span class="tag tag-protect">Protéger</span></h2>
+  <p>Chaque brique répond à un « pourquoi » précis, rattaché à la confidentialité, l'intégrité ou la disponibilité :</p>
+  <div class="services-grid">
+    <div class="service-card stage-protect">
+      <h4>Antivirus / EDR <span class="tag tag-legacy">Réactif</span></h4>
+      <p>Microsoft Defender : configuration, mise à jour des définitions, traitement des menaces détectées.</p>
+    </div>
+    <div class="service-card stage-protect">
+      <h4>Firewall <span class="tag tag-legacy">Préventif</span></h4>
+      <p>Bloque les intrusions entrantes et contient les communications sortantes d'une machine déjà compromise.</p>
+    </div>
+    <div class="service-card stage-protect">
+      <h4>Chiffrement du stockage</h4>
+      <p>Protège la confidentialité des données au repos en cas de perte ou de vol (BitLocker, FileVault).</p>
+    </div>
+    <div class="service-card stage-protect">
+      <h4>Navigation sécurisée</h4>
+      <p>Ferme un vecteur d'entrée majeur : liens ouverts par l'utilisateur, sites malveillants (SmartScreen, Network Protection).</p>
+    </div>
+    <div class="service-card stage-protect">
+      <h4>Durcissement / lignes de base</h4>
+      <p>Réduit la surface d'attaque par défaut en imposant un socle de configuration.</p>
+    </div>
+    <div class="service-card stage-protect">
+      <h4>Privilèges et identité</h4>
+      <p>Limite les mouvements latéraux — la technique la plus utilisée par un attaquant une fois entré dans l'organisation.</p>
+    </div>
+  </div>
+  <p class="note">Ces briques se configurent via le nœud <strong>Endpoint Security</strong>, qui regroupe tous les paramétrages d'un même thème de sécurité.</p>
+
+  <h2><span class="num">5.</span>Étage Protéger — cas particulier : mobiles <span class="tag tag-protect">Protéger</span></h2>
+  <p>Même triptyque, seule la surface d'attaque change. Les plateformes mobiles sont globalement bien sécurisées tant que le terminal n'a pas été modifié via le jailbreak (iOS/iPadOS) ou le rootage (Android) — l'étage Vérifier détecte ces dérives. Référentiels complémentaires : CIS (<em>downloads.cisecurity.org</em>) et NIST SP 800-124r2.</p>
+  <div class="table-scroll">
+  <table class="compact">
+    <thead>
+      <tr><th>Plateforme</th><th>Modes supportés par MDE</th><th>Non supportés</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Android</td><td>Enterprise (Work Profile, Fully Managed, COBO, COPE), Device Administrator</td><td>Dedicated (COSU/Kiosk), AOSP</td></tr>
+      <tr><td>iOS/iPadOS</td><td>Supervisé (ADE, Apple Configurator), non supervisé (Device/User Enrollment), MAM</td><td>Dedicated/Shared/Kiosk</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Déploiement : Android via Managed Google Play Store + stratégie Restriction (VPN) ; iOS/iPadOS via Apple Business Manager + profil Custom ou VPN. En mode MAM, le paramètre <strong>Max allowed device threat level</strong> ajouté aux conditions de lancement de la stratégie de protection d'application relie directement le risque MDE (Protéger) à l'accès à l'application.</p>
+
+  <h2><span class="num">6.</span>Étage Vérifier — conformité des appareils <span class="tag tag-verify">Vérifier</span></h2>
+  <p>Vérifier consiste à définir un référentiel (une stratégie de conformité), l'évaluer sur chaque appareil, et signaler l'écart.</p>
+  <div class="services-grid">
+    <div class="service-card stage-verify">
+      <h4>Paramètres généraux</h4>
+      <p>Appareil sans stratégie assignée : non conforme par défaut recommandé. Intervalle de remontée d'état : 30 jours par défaut (1 à 120 jours) ; au-delà, appareil silencieux = non conforme.</p>
+    </div>
+    <div class="service-card stage-verify">
+      <h4>Actions en cas de non-conformité</h4>
+      <p>E-mail à l'utilisateur, notification poussée (iOS/iPadOS, Android Enterprise), verrouillage à distance, ajout à la liste de mise hors service (validation manuelle requise). Scénario progressif possible : grâce → non-conforme → retrait.</p>
+    </div>
+  </div>
+
+  <h3>Déclinaison par plateforme</h3>
+  <div class="table-scroll">
+  <table class="compact">
+    <thead>
+      <tr><th>Plateforme</th><th>Points clés vérifiés</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Windows</strong></td><td>BitLocker au démarrage, Secure Boot, intégrité de code (via Attestation Service) ; version d'OS min/max ; conformité Configuration Manager ; mot de passe, firewall/TPM/antivirus ; niveau de risque MDE (Clear/Low/Medium/High — non intégré à MDE = non conforme) ; distributions WSL autorisées.</td></tr>
+      <tr><td><strong>macOS</strong></td><td>Protection d'intégrité du système (SIP) ; version/build min/max ; mot de passe ; firewall (Stealth) ; System Policy Control (ex-Gatekeeper).</td></tr>
+      <tr><td><strong>Linux</strong></td><td>Distributions/versions autorisées ; chiffrement du stockage ; complexité du mot de passe ; conformité personnalisée (script + JSON).</td></tr>
+      <tr><td><strong>iOS/iPadOS</strong></td><td>Compte mail préexistant → non conforme ; blocage jailbreak ; version/build Apple ; niveau de risque MDE ; applications restreintes (bundle-id).</td></tr>
+      <tr><td><strong>Android</strong></td><td>Enterprise (Work Profile/Fully Managed/COPE) : niveau de risque MDE, blocage root, Google Play Protect, patch de sécurité, mot de passe appareil + profil pro. AOSP : blocage root, version/patch, mot de passe.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Scripts de conformité personnalisée</h3>
+  <p>Windows et Linux seulement : un script de découverte renvoie un résultat JSON, validé par un fichier de règles (<code>SettingName</code>, <code>Operator</code>, <code>DataType</code>, <code>Operand</code>, <code>MoreInfoURL</code>, <code>RemediationStrings</code>). Limite : 100 Ko et 100 règles par fichier.</p>
+  <div class="code-block">$hash = @{ Manufacturer = $WMI_ComputerSystem.Manufacturer; BiosVersion = $WMI_BIOS.SMBIOSBIOSVersion; TPMChipPresent = $TPM.TPMPresent }
+return $hash | ConvertTo-Json -Compress</div>
+  <div class="code-block">{ "SettingName":"BiosVersion", "Operator":"GreaterEquals", "DataType":"Version", "Operand":"2.3" }</div>
+  <p class="note">Import : Endpoint Security → Manage → Device Compliance → Scripts. Une fois importé, le script s'utilise dans une stratégie de conformité, couplé au fichier JSON.</p>
+
+  <h2><span class="num">7.</span>Étage Contrôler — accès conditionnel <span class="tag tag-control">Contrôler</span></h2>
+  <p>Cet étage combine les deux précédents : le signal de risque de <strong>Protéger</strong> (MDE) et le résultat de <strong>Vérifier</strong> (conformité Intune) deviennent des conditions d'accès, dans la logique Zero Trust de Microsoft Entra ID.</p>
+  <div class="services-grid">
+    <div class="service-card stage-control">
+      <h4>Conditions</h4>
+      <p>Risque utilisateur, risque de connexion, risque interne, plateforme, application cliente, flux d'authentification, filtres sur l'appareil.</p>
+    </div>
+    <div class="service-card stage-control">
+      <h4>Contrôles d'accès</h4>
+      <p>Identité (MFA, authentification forte) ; appareil conforme via Intune ou joint hybride ; application protégée par une stratégie MAM.</p>
+    </div>
+    <div class="service-card stage-control">
+      <h4>Contrôles de session</h4>
+      <p>Restrictions d'applications forcées, Defender for Cloud Apps, fréquence de connexion, évaluation d'accès continue (CAE), protection de jeton, Global Secure Access.</p>
+    </div>
+  </div>
+
+  <h2><span class="num">8.</span>Boucle fermée — suivi opérationnel</h2>
+  <p>Le triptyque ne vaut que s'il est mesuré dans la durée.</p>
+  <div class="table-scroll">
+  <table class="compact">
+    <thead>
+      <tr><th>Rapport</th><th>Ce qu'il montre</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Device compliance / trends</td><td>État par appareil, évolution sur 30 jours</td></tr>
+      <tr><td>Noncompliant devices and settings</td><td>Appareils et paramètres en cause</td></tr>
+      <tr><td>Devices without compliance policy</td><td>Appareils sans stratégie assignée</td></tr>
+      <tr><td>Windows hardware attestation report</td><td>Paramètres attestés par le matériel (BitLocker, Secure Boot…)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Appareils en liste de mise hors service : un administrateur revoit et choisit — nettoyer l'état, ou mettre hors service, tout ou partie de la sélection.</p>
+
+  <h2><span class="num">9.</span>Grille de lecture transverse</h2>
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Étage</th><th>Question posée</th><th>Mécanismes clés</th><th>Exemple</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="tag tag-protect">Protéger</span></td><td>L'appareil résiste-t-il à une attaque, ou la détecte-t-il ?</td><td>Antivirus/EDR, firewall, chiffrement, navigation sécurisée, durcissement, privilèges, identité</td><td>Microsoft Defender for Endpoint, BitLocker/FileVault</td></tr>
+      <tr><td><span class="tag tag-verify">Vérifier</span></td><td>L'état réel correspond-il à l'état attendu ?</td><td>Stratégies de conformité par plateforme, scripts personnalisés</td><td>Device Compliance (Intune)</td></tr>
+      <tr><td><span class="tag tag-control">Contrôler</span></td><td>L'accès doit-il être autorisé, restreint ou bloqué ?</td><td>Accès conditionnel (identité, appareil, application, session)</td><td>Conditional Access (Microsoft Entra ID)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Retenir ces trois mots — Protéger, Vérifier, Contrôler — suffit à reconstituer la structure complète du chapitre, quelle que soit la plateforme ou le mode de gestion évoqué.</p>
+
+  <footer>
+    Fiche de synthèse basée sur le chapitre « Sécurité et conformité des appareils », restructurée autour d'un fil conducteur unique.
+  </footer>
+
+</div>
+</body>
+</html>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

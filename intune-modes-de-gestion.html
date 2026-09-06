@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Intune — Modes de gestion</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-perso: #1f7a4d;
+    --tag-perso-bg: #e6f5ec;
+    --tag-corp: #a15c00;
+    --tag-corp-bg: #fdf1de;
+    --tag-legacy: #6a6f7a;
+    --tag-legacy-bg: #f0f1f3;
+    --tag-mixte: #7b3fd6;
+    --tag-mixte-bg: #f1e9fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 {
+    font-size: 1.9rem;
+    margin: 0 0 6px;
+  }
+  header.title-block p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .num {
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  p { margin: 10px 0; }
+  .intro {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .lifecycle {
+    list-style: none;
+    margin: 18px 0;
+    padding: 0;
+    counter-reset: step;
+  }
+  .lifecycle li {
+    counter-increment: step;
+    position: relative;
+    padding: 14px 16px 14px 52px;
+    margin-bottom: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .lifecycle li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lifecycle li strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+  .lifecycle li span {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .focus-box {
+    background: var(--accent-soft);
+    border: 1px solid #c9dcfb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+  }
+  .focus-box strong { display: block; margin-bottom: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  table.compact th, table.compact td { font-size: 0.85rem; padding: 8px 10px; }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .table-scroll { overflow-x: auto; }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-perso { color: var(--tag-perso); background: var(--tag-perso-bg); }
+  .tag-corp { color: var(--tag-corp); background: var(--tag-corp-bg); }
+  .tag-legacy { color: var(--tag-legacy); background: var(--tag-legacy-bg); }
+  .tag-mixte { color: var(--tag-mixte); background: var(--tag-mixte-bg); }
+  .note {
+    font-size: 0.9rem;
+    color: var(--muted);
+    border-left: 3px solid var(--border);
+    padding: 8px 14px;
+    margin: 14px 0;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .service-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--card-bg);
+  }
+  .service-card h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .service-card p {
+    margin: 0;
+    font-size: 0.93rem;
+    color: var(--text);
+  }
+  .service-card p + p { margin-top: 8px; }
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .flow .step {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+  }
+  .flow .arrow {
+    color: var(--muted);
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title-block">
+    <h1>Microsoft Intune — Modes de gestion</h1>
+    <p>Fiche de synthèse du chapitre « Modes de gestion » (par plateforme)</p>
+  </header>
+
+  <p class="intro">Ce chapitre répond à une seule question : comment Intune prend-il le contrôle d'un appareil ou d'une application ? Il pose d'abord un socle conceptuel — MDM (gestion du périphérique) contre MAM (gestion de l'application) — puis décline ce socle sur trois plateformes : Windows, iOS/iPadOS/macOS et Android. Sur chaque plateforme revient le même axe de lecture : un mode léger pensé pour le BYOD (l'appareil reste personnel) face à un mode complet pensé pour un appareil d'entreprise (contrôle total, effacement à distance).</p>
+
+  <h2><span class="num">1.</span>Concepts : MDM et MAM</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>MDM — Mobile Device Management <span class="tag tag-corp">Gère l'appareil</span></h4>
+      <p>Contrôle centralisé de l'appareil entier : inscription (enrollment) dans Intune, application de stratégies de sécurité, configuration réseau, déploiement d'applications, suivi de conformité. Couvre tout le cycle de vie du périphérique, de l'enregistrement au retrait, avec verrouillage/effacement à distance en cas de perte ou de vol.</p>
+    </div>
+    <div class="service-card">
+      <h4>MAM / APP — Application Protection Policies <span class="tag tag-perso">Gère l'application</span></h4>
+      <p>Sécurise et gère les applications professionnelles indépendamment de l'appareil sur lequel elles tournent — même un appareil non inscrit dans Intune peut voir ses applications pro protégées : code PIN, chiffrement des données, contrôle du copier-coller ou de la sauvegarde vers des emplacements non sécurisés. Application granulaire, politique par politique. Particulièrement adapté au BYOD.</p>
+    </div>
+  </div>
+  <div class="focus-box">
+    <strong>MDM + MAM sont combinables</strong>
+    Un appareil d'entreprise entièrement géré via MDM peut recevoir en plus des stratégies MAM sur des applications sensibles, comme couche de sécurité supplémentaire. Les entreprises peuvent aussi révoquer l'accès et effacer les données pro d'une application sans toucher aux données personnelles de l'utilisateur.
+  </div>
+  <p class="note">Le portail d'entreprise Intune (Company Portal) revient sur toutes les plateformes avec un rôle variable : point d'entrée pour l'inscription, relais technique vers Intune, ou simple interface libre-service pour l'utilisateur. La communication appareil ↔ Intune passe toujours par Internet via des API REST sécurisées, sans VPN nécessaire.</p>
+
+  <h2><span class="num">2.</span>Modes de gestion Windows</h2>
+  <p>Windows propose quatre modes MDM — traditionnel, moderne, cogestion, coexistence — plus un mode MAM via Microsoft Edge.</p>
+
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Mode</th><th>Principe</th><th>Outils / protocole</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Traditionnel</strong></td><td>Cycle de vie classique : déploiement de l'OS, déploiement d'applications, gestion des mises à jour, conformité/paramétrage. Poste verrouillé sur un standard d'entreprise, pas d'usage personnel.</td><td>Configuration Manager, Active Directory / GPO, WSUS, MDT</td></tr>
+      <tr><td><strong>Moderne / cloud native</strong></td><td>Cycle adapté à la mobilité : enregistrement → provisionnement des ressources → gestion/protection → retrait/effacement.</td><td>OMA-DM (ou le nouveau WinDC) via Intune</td></tr>
+      <tr><td><strong>Cogestion (co-management)</strong></td><td>Pont entre Configuration Manager et Intune pour migrer en douceur : chaque charge de travail peut être basculée individuellement vers Intune.</td><td>Configuration Manager + Intune (couple unique proposant la cogestion)</td></tr>
+      <tr><td><strong>Coexistence</strong></td><td>Un MDM tiers (pas Intune en cogestion officielle) est détecté par le client ConfigMgr, qui se désactive automatiquement sur les fonctions concernées.</td><td>ConfigMgr ne garde que l'inventaire, le contrôle d'usage logiciel et la gestion d'alimentation</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="flow">
+    <span class="step">Traditionnel</span><span class="arrow">→</span>
+    <span class="step">Cogestion</span><span class="arrow">→</span>
+    <span class="step">Moderne (100 % cloud)</span>
+  </div>
+  <p class="note">C'est la trajectoire résumée par le schéma du livre : les trois modes ne sont pas des choix isolés mais des étapes d'une même progression vers une gestion entièrement native au cloud.</p>
+
+  <h3>Cycle de vie du périphérique moderne</h3>
+  <ol class="lifecycle">
+    <li><strong>Enregistrement du périphérique</strong><span>Dans la solution d'administration (Intune).</span></li>
+    <li><strong>Provisionnement des ressources d'entreprise</strong><span>Profils, applications, accès configurés automatiquement.</span></li>
+    <li><strong>Gestion et protection du périphérique</strong><span>Stratégies de sécurité, conformité, mises à jour.</span></li>
+    <li><strong>Retrait / effacement des données</strong><span>Fin de vie ou perte/vol du périphérique.</span></li>
+  </ol>
+
+  <h3>Méthodes d'inscription Windows dans Intune</h3>
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Windows Autopilot <span class="tag tag-corp">Recommandé · Corporate</span></h4>
+      <p>Le périphérique est connu du service et suit un processus de provisionnement automatique guidé pour l'utilisateur.</p>
+    </div>
+    <div class="service-card">
+      <h4>Jointure manuelle à Microsoft Entra ID <span class="tag tag-corp">Recommandé · Corporate</span></h4>
+      <p>Enregistrement automatique dans Intune lorsque l'utilisateur joint manuellement le périphérique au tenant.</p>
+    </div>
+    <div class="service-card">
+      <h4>Hybridation avec Active Directory (Entra Hybrid Join) <span class="tag tag-corp">Corporate</span></h4>
+      <p>Enregistrement automatique via une stratégie de groupe, quand l'entreprise hybride ses machines avec Entra ID.</p>
+    </div>
+    <div class="service-card">
+      <h4>Cogestion avec Configuration Manager <span class="tag tag-corp">Corporate</span></h4>
+      <p>Enregistrement automatique dans Intune quand la cogestion est activée dans Configuration Manager.</p>
+    </div>
+    <div class="service-card">
+      <h4>Package de provisionnement (Windows Configuration Designer) <span class="tag tag-legacy">Non recommandé</span></h4>
+      <p>Un package exécuté sur la machine réalise la jointure au tenant et l'enregistrement automatique dans Intune.</p>
+    </div>
+    <div class="service-card">
+      <h4>Enregistrement manuel par l'utilisateur, dans Intune uniquement <span class="tag tag-perso">BYOD · Non recommandé en corporate</span></h4>
+      <p>Ne joint la machine à aucun domaine. Scénario pour périphériques personnels (BYOD) — la machine est identifiée comme « personal ».</p>
+    </div>
+  </div>
+
+  <div class="focus-box">
+    <strong>Deux agents techniques distincts sur la machine gérée</strong>
+    <strong>Client MDM (OMA-DM + CSP)</strong> — les Configuration Service Providers exposent des nœuds de configuration hiérarchiques, accessibles par URI, qui servent de pont entre les stratégies MDM et les réglages système sous-jacents. C'est le canal standard.<br><br>
+    <strong>Intune Management Extension (IME / sidecar)</strong> — agent complémentaire qui étend la gestion au-delà des CSP : scripts PowerShell et applications Win32 (Windows ou macOS), pour tout ce que les CSP ne couvrent pas nativement.
+  </div>
+  <p class="note">Cas particulier : l'agent Microsoft Defender for Endpoint (MsSense) embarque un mini-agent MDM capable de récupérer des stratégies de sécurité auprès d'Intune — ce qui permet de gérer des éléments de sécurité sur des machines non inscriptibles dans Intune, comme des serveurs.</p>
+
+  <h3>Cogestion : charges de travail basculables vers Intune</h3>
+  <p>La cogestion débloque des fonctionnalités cloud (accès conditionnel avec conformité, actions à distance, visibilité centralisée, lien avec Entra ID, provisionnement Autopilot) et permet de basculer, charge de travail par charge de travail, l'autorité de gestion vers Intune :</p>
+  <ul>
+    <li>Stratégies de conformité</li>
+    <li>Stratégie de mises à jour logicielles</li>
+    <li>Configuration du périphérique</li>
+    <li>Stratégies d'accès aux ressources de l'entreprise</li>
+    <li>Gestion de la sécurité du périphérique (suite Microsoft Defender : Antivirus, Firewall, Credential Guard…)</li>
+    <li>Gestion des applications Office Click-to-Run</li>
+    <li>Déploiements d'applications clientes</li>
+  </ul>
+  <p class="note">Par défaut, le client Configuration Manager garde le contrôle de tout. Une charge de travail basculée fait que les stratégies reçues côté ConfigMgr sont désactivées (non interprétées) au profit de celles reçues par l'agent MDM Intune. Le co-management n'a jamais été pensé comme une solution définitive : certaines entreprises (usine, contexte de sécurité spécifique) ne migreront jamais entièrement vers le cloud.</p>
+
+  <h3>MAM via Microsoft Edge</h3>
+  <p>Dernier mode évoqué pour Windows : le périphérique n'est pas inscrit dans Intune. C'est la création d'un profil Edge avec le compte utilisateur de l'entreprise qui permet au navigateur de récupérer des stratégies et de restreindre certaines actions (copier/coller…) sur les applications web pro, afin d'empêcher la fuite de données.</p>
+
+  <h2><span class="num">3.</span>Modes de gestion iOS/iPadOS et macOS</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Device Enrollment <span class="tag tag-perso">BYOD basique</span></h4>
+      <p>Le mode historique. N'importe quel appareil Apple peut s'enregistrer dès lors que l'utilisateur installe le portail d'entreprise et utilise son compte pro. Sans préenregistrement par l'administrateur, l'appareil est identifié « personal ». S'applique à iOS, iPadOS et macOS.</p>
+    </div>
+    <div class="service-card">
+      <h4>User Enrollment <span class="tag tag-mixte">BYOD confidentiel</span></h4>
+      <p>Le plus récent, pensé pour la confidentialité en BYOD — équivalent du Work Profile Android. Un identifiant Apple géré (Managed Apple ID) est créé ; l'espace de travail y est associé. Pas de séparation visuelle des applications (contrairement à Android), mais les données sont chiffrées et le partage contrôlé. L'effacement pro n'affecte pas les données personnelles. <strong>Non disponible sur macOS.</strong></p>
+    </div>
+    <div class="service-card">
+      <h4>Supervised <span class="tag tag-corp">Corporate · irréversible</span></h4>
+      <p>Fonctionnalités avancées : Activation Lock (verrouille l'activation à l'organisation, anti-vol), restrictions poussées (caméra, Safari, AirDrop…), déploiement silencieux d'applications, localisation et effacement à distance. Ne peut être retiré sans réinitialisation complète — à réserver aux périphériques d'entreprise. Sur macOS, la supervision se limite à l'Activation Lock.</p>
+    </div>
+  </div>
+
+  <h3>Trois façons d'obtenir le mode Supervised</h3>
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Méthode</th><th>Usage</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Apple Configurator</strong></td><td>Préparation manuelle, appareil par appareil, via Mac ou iPhone récent. Peut aussi servir à enregistrer un appareil dans ABM/ASM s'il n'a pas été préenregistré par le revendeur (libération possible par l'utilisateur pendant 30 jours après l'inscription Intune).</td></tr>
+      <tr><td><strong>Direct Enrollment</strong> (macOS uniquement)</td><td>Inscription en masse sans accès à ABM/ASM, ou nécessitant une connexion réseau câblée. N'associe pas l'appareil à un utilisateur — réservé aux postes partagés / kiosques.</td></tr>
+      <tr><td><strong>Automated Device Enrollment (ADE, ex-DEP)</strong></td><td>La méthode recommandée. Via Apple Business Manager (ABM) ou Apple School Manager (ASM) : l'appareil neuf se connecte et se configure automatiquement dès le premier allumage, avec un Setup Assistant personnalisable (masquage des étapes Apple ID, Siri…).</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p class="note">Architecture technique : protocole MDM Apple avec agent natif à l'OS, notifications via l'Apple Push Notification Service, authentification par certificat. Nouveau protocole déclaratif <strong>DDM</strong> (Declarative Device Management), équivalent du WinDC Windows : le client applique un état désiré et résout lui-même les conflits. Sur macOS, l'IME/Sidecar complète pour tout ce que les protocoles Apple ne savent pas gérer (scripts, installations d'applications).</p>
+
+  <h2><span class="num">4.</span>Modes de gestion Android</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Android Device Administrator (DA) <span class="tag tag-legacy">Déprécié</span></h4>
+      <p>Le tout premier mode (Android 2.2). Google retire progressivement ses API. Reste utilisé pour des périphériques spécialisés (salles de réunion) ou en Chine (services Google bloqués → Android Enterprise inutilisable). Basé sur OMA-DM, agent = portail d'entreprise Intune.</p>
+    </div>
+    <div class="service-card">
+      <h4>Android Enterprise <span class="tag tag-corp">Standard actuel</span></h4>
+      <p>Depuis Android 5.0 (2014). Repose sur les services mobiles Google (GMS). Deux concepts : <strong>Work Profile</strong> (conteneur professionnel isolé, API Google EMM) et <strong>Device Owner</strong> (gestion complète de l'appareil, API Google Android Management). Quatre scénarios détaillés ci-dessous.</p>
+    </div>
+    <div class="service-card">
+      <h4>AOSP <span class="tag tag-mixte">Sans services Google</span></h4>
+      <p>Android Open Source Project : appareils sans GMS, typiquement des casques VR/AR professionnels. Inscription sans compte utilisateur associé, via l'infrastructure IME/Sidecar — le portail d'entreprise fait office d'agent MDM. Périphériques configurés en mode appareil partagé (Device Shared Mode) Entra ID, avec SSO entre utilisateurs.</p>
+    </div>
+  </div>
+
+  <h3>Android Enterprise : les quatre scénarios</h3>
+  <div class="services-grid">
+    <div class="service-card">
+      <h4>Work Profile <span class="tag tag-perso">BYOD</span></h4>
+      <p>Appareil personnel avec un profil professionnel. Partition séparée : applications et données pro isolées du reste. Contrôle granulaire des ressources pro, vie privée respectée côté perso.</p>
+    </div>
+    <div class="service-card">
+      <h4>Dedicated / COSU <span class="tag tag-corp">Company Owned, Single Use</span></h4>
+      <p>Appareils à usage unique — kiosques, points de vente. Microsoft recommande la surcouche <strong>Managed Home Screen</strong>, personnalisable, pour le mode kiosque et les appareils partagés.</p>
+    </div>
+    <div class="service-card">
+      <h4>Fully Managed / COBO <span class="tag tag-corp">Company Owned, Business Only</span></h4>
+      <p>Appareil d'entreprise entièrement géré dès l'inscription : contrôle total des configurations, applications et politiques de sécurité.</p>
+    </div>
+    <div class="service-card">
+      <h4>COPE <span class="tag tag-corp">Company Owned, Personally Enabled</span></h4>
+      <p>Combine appareil entièrement géré et flexibilité du Work Profile : partitions distinctes pro/perso sur un appareil qui appartient à l'entreprise.</p>
+    </div>
+  </div>
+
+  <div class="table-scroll">
+  <table class="compact">
+    <thead>
+      <tr><th>Critère</th><th>Work Profile</th><th>Dedicated</th><th>Fully Managed</th><th>COPE</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Version Android minimum</td><td>6</td><td>8</td><td>8</td><td>11</td></tr>
+      <tr><td>Provisionnement sorti du carton</td><td>Oui (Samsung KNOX)</td><td>Oui (QR Code, ZeroTouch, KNOX)</td><td>Oui (QR Code, ZeroTouch, KNOX)</td><td>Oui (QR Code, ZeroTouch, KNOX)</td></tr>
+      <tr><td>Inscription possible après le 1er démarrage</td><td>Oui</td><td>Non</td><td>Non</td><td>Non</td></tr>
+      <tr><td>Gestion de la conformité</td><td>Limitée au Work Profile</td><td>Complète</td><td>Complète</td><td>Complète</td></tr>
+      <tr><td>Configuration avancée du téléphone</td><td>Non</td><td>Oui</td><td>Oui</td><td>Oui</td></tr>
+      <tr><td>Protection du périphérique via MDE</td><td>Oui</td><td>Non</td><td>Oui</td><td>Non</td></tr>
+      <tr><td>Effacement à distance</td><td>Limité au conteneur</td><td>Complet</td><td>Complet</td><td>Complet</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Samsung KNOX n'est disponible que sur les appareils Samsung. Le support de MDE par Dedicated et COPE pourrait être étendu dans les années à venir. Autres surcouches constructeur : Lenovo ThinkShield (appareils Motorola).</p>
+
+  <h3>AOSP : ce qui est géré et ce qui ne l'est pas</h3>
+  <p>Pas de déploiement d'applications depuis le Google Play Store (pas de GMS), pas de stratégies de protection applicative liées au store. En revanche : stratégies de restriction, certificats (SCEP, PKCS), certificats de confiance, profils Wi-Fi, stratégies de conformité, applications métier dont les sources sont disponibles. Constructeurs supportés à l'écriture du livre : HTC, Meta, PICO, Realwear, Lenovo, DigiLens Inc, Vuzix, Zebra.</p>
+
+  <h2><span class="num">5.</span>Grille de lecture transverse</h2>
+  <p>Le même dégradé « BYOD léger → conteneur isolé → contrôle total d'entreprise » traverse les trois plateformes :</p>
+  <div class="table-scroll">
+  <table>
+    <thead>
+      <tr><th>Niveau de contrôle</th><th>Windows</th><th>Apple</th><th>Android</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="tag tag-perso">BYOD léger</span></td><td>Enregistrement manuel dans Intune uniquement</td><td>Device Enrollment</td><td>Device Administrator (legacy)</td></tr>
+      <tr><td><span class="tag tag-mixte">Conteneur isolé (BYOD confidentiel)</span></td><td>— (pas d'équivalent direct)</td><td>User Enrollment</td><td>Android Enterprise — Work Profile</td></tr>
+      <tr><td><span class="tag tag-corp">Contrôle total (corporate)</span></td><td>Moderne / cogestion / traditionnel</td><td>Supervised</td><td>Android Enterprise — Dedicated / Fully Managed / COPE</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">Retenir en une phrase : Intune gère soit l'appareil (MDM) soit uniquement l'application (MAM) ; et sur chaque plateforme, ce même dégradé BYOD → conteneur isolé → contrôle total revient, avec pour Windows une dimension historique supplémentaire (traditionnel → cogestion → moderne).</p>
+
+  <footer>
+    Fiche de synthèse basée sur le chapitre « Modes de gestion » (Aperçu et fondamentaux).
+  </footer>
+
+</div>
+</body>
+</html>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

@@ -1,0 +1,984 @@
+<title>Enrôlement des appareils Intune</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#EEF1F4;
+    --surface:#FFFFFF;
+    --panel:#E4E9EF;
+    --ink:#16202C;
+    --ink-soft:#4B5A6B;
+    --line:#C9D2DB;
+    --accent:#2A5C99;
+    --accent-soft:#DCE7F2;
+    --win:#2458C4;
+    --apple:#5C5C68;
+    --android:#2E7D4F;
+    --linux:#A85A17;
+    --win-soft:#E1E9FA;
+    --apple-soft:#E7E7EC;
+    --android-soft:#DFF0E4;
+    --linux-soft:#F5E5D2;
+    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F151C;
+      --surface:#161E27;
+      --panel:#1B2530;
+      --ink:#E7ECF1;
+      --ink-soft:#9FB0C0;
+      --line:#2A3946;
+      --accent:#7FB0E8;
+      --accent-soft:#1D3145;
+      --win:#7FA8F5;
+      --apple:#B7B7C2;
+      --android:#7FCB9A;
+      --linux:#E3A365;
+      --win-soft:#1C2A44;
+      --apple-soft:#262631;
+      --android-soft:#1A2E22;
+      --linux-soft:#2E2416;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F151C;
+    --surface:#161E27;
+    --panel:#1B2530;
+    --ink:#E7ECF1;
+    --ink-soft:#9FB0C0;
+    --line:#2A3946;
+    --accent:#7FB0E8;
+    --accent-soft:#1D3145;
+    --win:#7FA8F5;
+    --apple:#B7B7C2;
+    --android:#7FCB9A;
+    --linux:#E3A365;
+    --win-soft:#1C2A44;
+    --apple-soft:#262631;
+    --android-soft:#1A2E22;
+    --linux-soft:#2E2416;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size:17.5px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+
+  .wrap{ max-width:800px; margin:0 auto; padding:64px 24px 120px; }
+
+  .eyebrow{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--accent);
+    display:inline-block;
+  }
+
+  h1{
+    font-family:"Archivo", "Segoe UI", sans-serif;
+    font-weight:800;
+    font-size:clamp(30px,5vw,44px);
+    line-height:1.08;
+    letter-spacing:-.01em;
+    margin:14px 0 16px;
+    text-wrap:balance;
+  }
+  .dek{
+    font-size:19px;
+    color:var(--ink-soft);
+    max-width:62ch;
+    margin:0 0 8px;
+    text-wrap:balance;
+  }
+  .intro{
+    margin-top:28px;
+    padding-top:28px;
+    border-top:1px solid var(--line);
+  }
+
+  h2{
+    font-family:"Archivo", "Segoe UI", sans-serif;
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:-.005em;
+    margin:64px 0 6px;
+    text-wrap:balance;
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+  }
+  h2 .num{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:14px;
+    font-weight:600;
+    color:var(--accent);
+    background:var(--accent-soft);
+    border-radius:5px;
+    padding:3px 8px;
+  }
+  h3{
+    font-family:"Archivo", "Segoe UI", sans-serif;
+    font-weight:700;
+    font-size:18.5px;
+    margin:34px 0 8px;
+    letter-spacing:-.003em;
+  }
+  p{ margin:0 0 16px; max-width:66ch; }
+  ul,ol{ margin:0 0 16px; padding-left:1.3em; max-width:64ch; }
+  li{ margin:0 0 8px; }
+  strong{ font-weight:600; color:var(--ink); }
+  code{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:.86em;
+    background:var(--panel);
+    padding:.1em .38em;
+    border-radius:4px;
+    color:var(--ink);
+  }
+  a{ color:var(--accent); }
+
+  .lede{
+    font-size:19px;
+    color:var(--ink-soft);
+  }
+
+  /* platform tag pill */
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    padding:3px 9px 3px 8px;
+    border-radius:5px;
+    border:1px solid transparent;
+  }
+  .tag::before{ content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .tag.win{ color:var(--win); background:var(--win-soft); }
+  .tag.apple{ color:var(--apple); background:var(--apple-soft); }
+  .tag.android{ color:var(--android); background:var(--android-soft); }
+  .tag.linux{ color:var(--linux); background:var(--linux-soft); }
+
+  /* generic panel / card with blueprint corner ticks */
+  .panel{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:26px 28px;
+    margin:20px 0 28px;
+    box-shadow:var(--shadow);
+  }
+  .panel::before, .panel::after{
+    content:"";
+    position:absolute;
+    width:10px; height:10px;
+    border-color:var(--line);
+    border-style:solid;
+  }
+  .panel::before{ top:-1px; left:-1px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+  .panel::after{ bottom:-1px; right:-1px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
+
+  .platform-panel{ border-left:3px solid var(--accent-c, var(--accent)); }
+  .platform-panel.win{ --accent-c:var(--win); }
+  .platform-panel.apple{ --accent-c:var(--apple); }
+  .platform-panel.android{ --accent-c:var(--android); }
+  .platform-panel.linux{ --accent-c:var(--linux); }
+
+  .callout{
+    background:var(--accent-soft);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 22px;
+    margin:22px 0;
+    font-size:16px;
+  }
+  .callout .lbl{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    display:block;
+    margin-bottom:6px;
+  }
+  .callout p:last-child{ margin-bottom:0; }
+
+  /* table */
+  .table-wrap{ overflow-x:auto; margin:20px 0 28px; border:1px solid var(--line); border-radius:10px; }
+  table{ border-collapse:collapse; width:100%; min-width:560px; font-size:15px; }
+  thead th{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:left;
+    padding:12px 16px;
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+  }
+  tbody th{
+    text-align:left;
+    font-family:"Archivo", sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:12px 16px;
+    color:var(--ink);
+    white-space:nowrap;
+    background:var(--surface);
+  }
+  tbody td{
+    padding:12px 16px;
+    border-top:1px solid var(--line);
+    vertical-align:top;
+    background:var(--surface);
+    color:var(--ink-soft);
+    font-size:14.5px;
+    line-height:1.5;
+  }
+  tbody tr:first-child td{ border-top:none; }
+
+  /* figure / diagrams */
+  figure{ margin:26px 0 30px; }
+  .fig-frame{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 16px 10px;
+    overflow-x:auto;
+  }
+  figcaption{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:10px;
+    text-align:center;
+  }
+  svg text{ font-family:"IBM Plex Mono", monospace; }
+  .svg-ink{ color:var(--ink); }
+  .svg-soft{ color:var(--ink-soft); }
+  .svg-line{ color:var(--line); }
+
+  hr.sep{
+    border:none;
+    border-top:1px solid var(--line);
+    margin:56px 0;
+  }
+
+  .why-strip{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:14px 0 22px;
+  }
+  .why-strip .chip{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 12px;
+  }
+
+  .memo{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+    margin:20px 0 30px;
+  }
+  @media (min-width:640px){ .memo{ grid-template-columns:1fr 1fr; } }
+  .memo .cell{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px 18px;
+    background:var(--surface);
+  }
+  .memo .cell h4{
+    margin:0 0 8px;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    display:flex; align-items:center; gap:8px;
+  }
+  .memo .cell p{ margin:0; font-size:14.5px; color:var(--ink-soft); }
+
+  footer{
+    margin-top:70px;
+    padding-top:24px;
+    border-top:1px solid var(--line);
+    font-family:"IBM Plex Mono", monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+
+  ::-webkit-scrollbar{ height:8px; }
+</style>
+
+<div class="wrap">
+
+  <div class="eyebrow">MD-102 · Enregistrement des appareils</div>
+  <h1>Comment un appareil devient « géré » dans Intune</h1>
+  <p class="dek">Windows, Apple, Android et Linux ne racontent pas la même histoire dans le livre — mais sous les noms de menus, les quatre suivent le même schéma en trois briques. Comprendre ce schéma d'abord rend chaque particularité logique, plutôt qu'à apprendre par cœur.</p>
+
+  <div class="intro">
+    <p class="lede">Ces quatre fichiers traitent chacun une plateforme séparément parce que Microsoft, Apple et Google possèdent chacun leur propre écosystème d'identité et de communication avec l'appareil — et Linux n'en a aucun. C'est cette différence de propriétaire qui explique <em>toutes</em> les divergences que vous allez lire, section après section. On part donc du général (ce que « enregistrer » veut dire, quel que soit l'OS) avant d'aller vers le particulier (pourquoi Apple a besoin d'un certificat annuel, pourquoi Android a cinq modes, pourquoi Linux n'a presque rien).</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">01</span> Le tronc commun : trois briques, quel que soit l'OS</h2>
+
+  <p>« Enregistrer » un appareil dans Intune, ce n'est jamais « installer une application ». C'est toujours établir trois choses, dans cet ordre :</p>
+
+  <ol>
+    <li><strong>Une identité</strong> — à quel tenant, quelle organisation, quel compte l'appareil (ou son utilisateur) appartient-il ?</li>
+    <li><strong>Un canal permanent</strong> — comment Intune peut-il réveiller l'appareil à tout moment pour lui pousser une commande, sans attendre que l'utilisateur ouvre une application ?</li>
+    <li><strong>Un profil de mise en service</strong> — que doit-il se passer pendant l'écran d'accueil (OOBE / Setup Assistant), et l'appareil est-il rattaché à un utilisateur précis (« affinité ») ou reste-t-il anonyme (kiosque, casque VR, borne) ?</li>
+  </ol>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 920 190" role="img" aria-label="Schéma du tronc commun : un appareil acquiert une identité, puis un canal permanent, puis un profil de mise en service, avant d'apparaître comme géré dans Intune.">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor" class="svg-ink"/>
+          </marker>
+        </defs>
+        <!-- connecting spine -->
+        <line x1="70" y1="95" x2="850" y2="95" stroke="currentColor" class="svg-line" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+        <!-- boxes -->
+        <g font-size="12.5" class="svg-ink">
+          <!-- device -->
+          <rect x="10" y="65" width="120" height="60" rx="8" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <text x="70" y="90" text-anchor="middle" font-weight="600">Appareil</text>
+          <text x="70" y="106" text-anchor="middle" class="svg-soft" font-size="11">neuf ou existant</text>
+
+          <!-- identity -->
+          <rect x="200" y="55" width="150" height="80" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="275" y="82" text-anchor="middle" font-weight="700" fill="var(--accent)">① Identité</text>
+          <text x="275" y="100" text-anchor="middle" class="svg-soft" font-size="10.5">compte / jointure</text>
+          <text x="275" y="114" text-anchor="middle" class="svg-soft" font-size="10.5">à un tenant</text>
+
+          <!-- channel -->
+          <rect x="415" y="55" width="170" height="80" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="500" y="78" text-anchor="middle" font-weight="700" fill="var(--accent)">② Canal permanent</text>
+          <text x="500" y="96" text-anchor="middle" class="svg-soft" font-size="10.5">agent MDM + service</text>
+          <text x="500" y="110" text-anchor="middle" class="svg-soft" font-size="10.5">de notification push</text>
+
+          <!-- profile -->
+          <rect x="650" y="55" width="150" height="80" rx="8" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="725" y="82" text-anchor="middle" font-weight="700" fill="var(--accent)">③ Profil</text>
+          <text x="725" y="100" text-anchor="middle" class="svg-soft" font-size="10.5">mise en service</text>
+          <text x="725" y="114" text-anchor="middle" class="svg-soft" font-size="10.5">+ affinité ou non</text>
+
+          <!-- intune -->
+          <rect x="840" y="65" width="70" height="60" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="875" y="90" text-anchor="middle" font-weight="700" fill="var(--accent)" font-size="12">Intune</text>
+          <text x="875" y="106" text-anchor="middle" class="svg-soft" font-size="10">« géré »</text>
+        </g>
+
+        <!-- arrows on spine, drawn as small triangles between boxes -->
+        <g stroke="currentColor" class="svg-ink" stroke-width="1.6" fill="none" marker-end="url(#arrow)">
+          <line x1="132" y1="95" x2="196" y2="95"/>
+          <line x1="352" y1="95" x2="411" y2="95"/>
+          <line x1="587" y1="95" x2="646" y2="95"/>
+          <line x1="802" y1="95" x2="836" y2="95"/>
+        </g>
+
+        <text x="460" y="170" text-anchor="middle" class="svg-soft" font-size="11.5">Chaque OS construit ces trois briques avec ses propres outils — c'est tout ce qui change ci-dessous.</text>
+      </svg>
+    </div>
+    <figcaption>Fig. 1 — Le mécanisme est identique pour les quatre OS ; seuls les outils qui remplissent chaque case changent.</figcaption>
+  </figure>
+
+  <p>Le tableau suivant montre comment chaque plateforme remplit ces trois cases. Gardez-le sous les yeux : chaque section « cas particulier » plus bas n'est qu'un développement d'une de ces lignes.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Brique</th><th>Windows</th><th>Apple</th><th>Android</th><th>Linux</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>① Identité</th>
+          <td>Jointure Microsoft Entra ID — <em>native</em>, l'OS et l'identité appartiennent au même éditeur</td>
+          <td>Certificat Apple Push MDM + compte Apple géré (éventuellement fédéré à Entra ID)</td>
+          <td>Compte <em>Managed Google Play</em> lié au tenant</td>
+          <td>Simple compte Entra ID saisi dans l'application Intune</td>
+        </tr>
+        <tr>
+          <th>② Canal permanent</th>
+          <td>Agent MDM Windows natif</td>
+          <td>Profil MDM + service <em>APNs</em> (push Apple)</td>
+          <td>Agent DPC + <em>Firebase Cloud Messaging</em> (push Google)</td>
+          <td>Application Intune — pas de vrai push, fonctionnement plus proche du client classique</td>
+        </tr>
+        <tr>
+          <th>③ Profil</th>
+          <td>Autopilot ou jointure manuelle</td>
+          <td>Profil d'enregistrement via Apple Business Manager</td>
+          <td>Profil d'enregistrement via Zero Touch / Samsung KME</td>
+          <td>Aucun — pas de notion de mise en service pilotée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">02</span> Six points communs qui structurent les quatre chapitres</h2>
+  <p>Une fois le tronc posé, six motifs reviennent systématiquement d'un OS à l'autre. Les repérer évite de redécouvrir la même idée quatre fois sous quatre noms différents.</p>
+
+  <h3>2.1 — Un point de confiance à instancier avant tout le reste</h3>
+  <p>Avant même de parler d'un appareil précis, il faut créer <strong>le lien de confiance entre Intune et le fabricant</strong> : le certificat Apple Push MDM, le compte Managed Google Play, ou pour Windows les enregistrements CNAME qui redirigent le flux de jointure Windows vers Intune. Sans cette étape zéro, aucun appareil de la plateforme ne peut s'enregistrer, quelle que soit la méthode choisie ensuite.</p>
+
+  <h3>2.2 — Deux familles de résultat : avec ou sans affinité utilisateur</h3>
+  <p>Un appareil enregistré <strong>avec affinité</strong> est rattaché à une personne (poste de travail nominatif). <strong>Sans affinité</strong>, il reste anonyme et sert à plusieurs personnes ou à personne (kiosque, borne, casque VR, salle de réunion). On retrouve cette distinction telle quelle : profils Apple ABM (affinité oui/non), Android Dedicated/AOSP « userless », et le mode partagé Microsoft Entra (Shared Device Mode) qui apparaît aussi bien côté Android que côté Windows/AVD.</p>
+
+  <h3>2.3 — L'enregistrement automatique dépend toujours d'un tiers</h3>
+  <p>Dès qu'on veut enregistrer des appareils <em>en masse</em>, sans qu'un technicien ou un utilisateur ne touche à quoi que ce soit, il faut passer par un programme opéré par le <strong>revendeur</strong> qui a vendu le matériel : Apple Business Manager, Android Zero Touch, Samsung KNOX Mobile Enrollment. Le revendeur associe l'appareil au tenant <em>avant même sa première mise sous tension</em>. Windows Autopilot suit exactly la même logique (il fait l'objet du chapitre suivant). Linux est la seule plateforme sans aucun programme de ce type.</p>
+
+  <h3>2.4 — Les jetons et certificats expirent — et c'est volontaire</h3>
+  <p>Certificat Apple Push MDM (365 jours), jeton Apple Business Manager (annuel), jeton d'un package de provisionnement Windows (WCD), jeton d'un profil Android en mode <em>staging</em> : tous ont une durée de vie limitée. Ce n'est pas un oubli — c'est un garde-fou de sécurité volontaire, pour qu'un jeton perdu ou volé finisse par devenir inoffensif. La contrepartie, systématique dans les quatre écosystèmes sauf Linux : oublier de renouveler bloque les <em>nouveaux</em> enregistrements et, pour Apple, finit par faire perdre la gestion des appareils déjà inscrits.</p>
+
+  <h3>2.5 — Le BYOD est un mode dégradé, jamais un mode par défaut</h3>
+  <p>Chaque écosystème propose un mode « appareil personnel » avec un contrat implicite : moins de contrôle pour l'entreprise (pas d'effacement total, pas de verrouillage), en échange d'une meilleure protection de la vie privée pour l'utilisateur. Windows Workgroup, Apple User Enrollment, Android Work Profile : les trois isolent les données pro sans toucher au reste du téléphone ou du PC. <strong>Linux fait figure d'exception totale</strong> — le texte source est explicite : « il n'existe pas de scénario personnel (BYOD) ». Tout appareil Linux enregistré est, par construction, un appareil d'entreprise.</p>
+
+  <h3>2.6 — Un profil d'enregistrement est aussi une étiquette pour l'automatisation</h3>
+  <p>Chaque appareil enregistré via un profil (Apple ABM, Android Zero Touch/KME) hérite d'une propriété <code>enrollmentProfileName</code> exploitable pour construire des <strong>groupes dynamiques Microsoft Entra ID</strong>. C'est ce qui permet de dire « tous les iPad enregistrés avec le profil Kiosque reçoivent automatiquement telle configuration » sans intervention manuelle après le déploiement initial.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">03</span> Pourquoi ça diverge : qui possède l'identité de l'appareil</h2>
+
+  <p>Voici la clé qui explique tout le reste du chapitre. Intune n'est <strong>propriétaire</strong> de l'identité de l'appareil que dans un seul cas : <strong>Windows</strong>, parce que Microsoft possède à la fois le système d'exploitation et le service d'identité (Entra ID). Joindre Entra ID <em>est</em> déjà, presque, s'enregistrer dans Intune — les deux opérations sont la même brique.</p>
+
+  <p>Pour Apple et Google, c'est l'inverse : ce sont <strong>eux</strong> qui possèdent l'OS et le canal de communication natif avec l'appareil (APNs pour Apple, GMS pour Android). Intune doit donc se « brancher » sur leur infrastructure — d'où l'obligation de créer un compte ou un certificat <em>chez eux</em>, sur <em>leurs</em> portails (identity.apple.com, business.apple.com, Managed Google Play), avant de pouvoir gérer le moindre appareil. Ce branchement se traduit systématiquement par le même schéma en trois temps : un <strong>revendeur</strong> associe l'appareil au tenant du fabricant → le fabricant redirige l'appareil vers Intune via un <strong>jeton</strong> → Intune applique un <strong>profil</strong>.</p>
+
+  <p>Linux, enfin, n'appartient à personne : pas de service cloud propriétaire de l'OS, pas de programme de mise en service piloté par un vendeur, pas de notion de supervision. D'où un enregistrement réduit à sa plus simple expression : une application, une authentification.</p>
+
+  <h3>3.1 — Ce que veut dire concrètement « canal de communication natif »</h3>
+
+  <p>Un appareil mobile ne peut pas garder une connexion permanente ouverte vers Intune — ce serait beaucoup trop coûteux en batterie. Chaque OS garde donc <strong>une seule</strong> connexion longue durée, économe en énergie, en permanence ouverte — mais elle ne va pas vers Intune : elle va vers le service de notification que <em>le fabricant de l'OS</em> possède et fait tourner. C'est ce service qu'on appelle le canal natif :</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>OS</th><th>Service de push natif</th><th>Propriétaire</th></tr></thead>
+      <tbody>
+        <tr><th>iOS / iPadOS / macOS</th><td>APNs — Apple Push Notification service</td><td>Apple</td></tr>
+        <tr><th>Android</th><td>FCM — Firebase Cloud Messaging (via GMS)</td><td>Google</td></tr>
+        <tr><th>Windows</th><td>WNS — Windows Notification Service</td><td>Microsoft</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Comme Intune n'a jamais d'accès direct à l'appareil, tout passe par ce relais en trois temps :</p>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 820 230" role="img" aria-label="Intune envoie un signal minimal au service de push du fabricant, qui le relaie via sa connexion permanente vers l'appareil ; l'appareil rappelle ensuite Intune en HTTPS pour récupérer la vraie commande.">
+        <defs>
+          <marker id="arrow3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <g font-size="12.5" class="svg-ink">
+          <rect x="10" y="60" width="150" height="70" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.7"/>
+          <text x="85" y="90" text-anchor="middle" font-weight="700" fill="var(--accent)">Intune</text>
+          <text x="85" y="107" text-anchor="middle" class="svg-soft" font-size="10.5">n'a pas d'accès direct</text>
+
+          <rect x="330" y="50" width="180" height="90" rx="8" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <text x="420" y="80" text-anchor="middle" font-weight="700">Service push</text>
+          <text x="420" y="97" text-anchor="middle" class="svg-soft" font-size="10.5">du fabricant de l'OS</text>
+          <text x="420" y="112" text-anchor="middle" class="svg-soft" font-size="10.5">(APNs / FCM / WNS)</text>
+
+          <rect x="655" y="60" width="150" height="70" rx="8" fill="none" stroke="currentColor" stroke-width="1.7"/>
+          <text x="730" y="90" text-anchor="middle" font-weight="700">Appareil</text>
+          <text x="730" y="107" text-anchor="middle" class="svg-soft" font-size="10.5">connexion perm. ouverte</text>
+        </g>
+
+        <g stroke="var(--accent)" stroke-width="1.6" fill="none" marker-end="url(#arrow3)">
+          <line x1="163" y1="82" x2="327" y2="82"/>
+        </g>
+        <text x="245" y="68" text-anchor="middle" fill="var(--accent)" font-size="11">① signal minimal</text>
+        <text x="245" y="112" text-anchor="middle" fill="var(--accent)" font-size="10">« réveille cet appareil »</text>
+
+        <g stroke="currentColor" class="svg-ink" stroke-width="1.6" fill="none" marker-end="url(#arrow3)">
+          <line x1="513" y1="90" x2="652" y2="90"/>
+        </g>
+        <text x="583" y="76" text-anchor="middle" class="svg-ink" font-size="11">② relayé via la</text>
+        <text x="583" y="128" text-anchor="middle" class="svg-ink" font-size="10">connexion déjà ouverte</text>
+
+        <path d="M 730 133 C 730 195, 85 195, 85 133" fill="none" stroke="var(--linux)" stroke-width="1.6" marker-end="url(#arrow3)"/>
+        <text x="407" y="215" text-anchor="middle" fill="var(--linux)" font-size="11">③ l'appareil rappelle Intune en HTTPS pour chercher la vraie commande / stratégie</text>
+      </svg>
+    </div>
+    <figcaption>Fig. 3 — Intune ne parle jamais directement à l'appareil : il sonne à la porte du fabricant, qui relaie, puis l'appareil rappelle lui-même.</figcaption>
+  </figure>
+
+  <p>C'est précisément parce qu'Apple et Google possèdent ce canal qu'ils décident qui a le droit de l'emprunter pour joindre leurs appareils : le <strong>certificat Apple Push MDM</strong> est la clé qu'Apple délivre à Intune pour utiliser APNs vers <em>vos</em> appareils ; le <strong>compte Managed Google Play</strong> joue le même rôle côté FCM. Windows possède l'équivalent (WNS), mais comme Microsoft possède WNS, Intune <em>et</em> Entra ID à la fois, l'intégration est déjà faite en interne — d'où l'absence de certificat séparé à créer dans ce chapitre.</p>
+
+  <h3>3.2 — Deux couches à ne pas confondre : le rattachement et le canal</h3>
+
+  <p>ABM, Zero Touch, APNs, FCM : quatre sigles qui donnent l'impression de décrire la même chose, alors qu'ils se situent à deux niveaux complètement différents de l'architecture — et surtout, à deux <strong>moments</strong> différents.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>ABM / Zero Touch</th><th>APNs / FCM</th></tr></thead>
+      <tbody>
+        <tr><th>Nature</th><td>Portail administratif de rattachement en masse</td><td>Service réseau de notification push</td></tr>
+        <tr><th>Question à laquelle ça répond</th><td>« À quelle organisation appartient cet appareil, et vers quel MDM le rediriger ? »</td><td>« Comment réveiller cet appareil précis, là, maintenant ? »</td></tr>
+        <tr><th>Quand ça sert</th><td>Une seule fois — à l'achat, puis au tout premier démarrage</td><td>En continu, pendant toute la durée de gestion</td></tr>
+        <tr><th>Analogie</th><td>L'acte de propriété</td><td>La ligne téléphonique</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Le passage de l'un à l'autre suit toujours le même scénario en deux temps :</p>
+  <ul>
+    <li><strong>Flux 1 — l'inventaire (avant même l'allumage).</strong> Intune interroge périodiquement ABM/Zero Touch pour récupérer la liste des appareils qui lui sont assignés — toutes les 12 heures côté Apple, ou à la demande via le bouton <em>Sync</em>. Ce pull ne gère encore rien : il permet juste de préassigner un profil d'enregistrement à un appareil encore dans son carton, et de détecter sa disparition si l'organisation le retire du tenant.</li>
+    <li><strong>Flux 2 — l'enregistrement réel (au premier démarrage).</strong> L'appareil contacte lui-même Apple/Google, qui vérifie son numéro de série et le redirige vers Intune. L'appareil installe alors le profil de gestion et bascule <em>définitivement</em> sur le canal permanent (APNs/FCM, Fig. 3). Passé ce point, ABM/Zero Touch ne sert plus jamais au jour le jour : toute la gestion — pousser une stratégie, vérifier la conformité, effacer l'appareil — transite uniquement par APNs/FCM.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="lbl">Glossaire des sigles</span>
+    <table style="width:100%; border-collapse:collapse; font-size:14.5px;">
+      <tbody>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>APNs</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Apple Push Notification service</em> — service de notification push d'Apple</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>FCM</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Firebase Cloud Messaging</em> — service de notification push de Google, brique technique de GMS</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>GMS</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Google Mobile Services</em> — l'ensemble des services Google intégrés à Android (Play Store, FCM…)</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>WNS</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Windows Notification Service</em> — équivalent Windows d'APNs/FCM</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>ABM</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Apple Business Manager</em> — portail Apple de rattachement en masse pour les entreprises</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>ASM</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Apple School Manager</em> — même portail, pour les établissements scolaires</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>Zero Touch</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Android Zero-touch enrollment</em> — programme Google équivalent d'ABM</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>KME</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Knox Mobile Enrollment</em> — programme équivalent chez Samsung</td></tr>
+        <tr><td style="padding:4px 10px 4px 0; white-space:nowrap;"><strong>DPC</strong></td><td style="padding:4px 0; color:var(--ink-soft);"><em>Device Policy Controller</em> — nom générique de l'agent MDM sur un appareil Android Enterprise</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 900 300" role="img" aria-label="Comparaison des chaînes d'enregistrement automatique en masse : revendeur, service cloud du fabricant, jeton, puis Intune, pour Windows, Apple et Android ; chaîne absente pour Linux.">
+        <defs>
+          <marker id="arrow2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- column headers -->
+        <g font-size="11" class="svg-soft" font-weight="600">
+          <text x="150" y="26" text-anchor="middle">REVENDEUR</text>
+          <text x="380" y="26" text-anchor="middle">CLOUD DU FABRICANT</text>
+          <text x="600" y="26" text-anchor="middle">JETON</text>
+          <text x="800" y="26" text-anchor="middle">INTUNE</text>
+        </g>
+
+        <!-- WINDOWS lane -->
+        <g font-size="12">
+          <text x="20" y="63" class="svg-ink" font-weight="700" fill="var(--win)">Windows</text>
+          <text x="20" y="77" class="svg-soft" font-size="10">(Autopilot — chap. suivant)</text>
+          <rect x="95" y="45" width="110" height="34" rx="6" fill="var(--win-soft)" stroke="var(--win)" stroke-width="1.3"/>
+          <text x="150" y="66" text-anchor="middle" fill="var(--win)">OEM</text>
+          <rect x="325" y="45" width="110" height="34" rx="6" fill="var(--win-soft)" stroke="var(--win)" stroke-width="1.3"/>
+          <text x="380" y="66" text-anchor="middle" fill="var(--win)">Windows Autopilot</text>
+          <rect x="545" y="45" width="110" height="34" rx="6" fill="var(--win-soft)" stroke="var(--win)" stroke-width="1.3"/>
+          <text x="600" y="66" text-anchor="middle" fill="var(--win)">profil déploiement</text>
+          <rect x="745" y="45" width="110" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="800" y="66" text-anchor="middle" fill="var(--accent)">Intune</text>
+          <g stroke="var(--win)" stroke-width="1.4" marker-end="url(#arrow2)">
+            <line x1="207" y1="62" x2="323" y2="62"/>
+            <line x1="437" y1="62" x2="543" y2="62"/>
+            <line x1="657" y1="62" x2="743" y2="62"/>
+          </g>
+        </g>
+
+        <!-- APPLE lane -->
+        <g font-size="12">
+          <text x="20" y="123" class="svg-ink" font-weight="700" fill="var(--apple)">Apple</text>
+          <rect x="95" y="105" width="110" height="34" rx="6" fill="var(--apple-soft)" stroke="var(--apple)" stroke-width="1.3"/>
+          <text x="150" y="126" text-anchor="middle" fill="var(--apple)">revendeur</text>
+          <rect x="325" y="105" width="110" height="34" rx="6" fill="var(--apple-soft)" stroke="var(--apple)" stroke-width="1.3"/>
+          <text x="380" y="126" text-anchor="middle" fill="var(--apple)">Business Manager</text>
+          <rect x="545" y="105" width="110" height="34" rx="6" fill="var(--apple-soft)" stroke="var(--apple)" stroke-width="1.3"/>
+          <text x="600" y="126" text-anchor="middle" fill="var(--apple)">jeton ABM /an</text>
+          <rect x="745" y="105" width="110" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="800" y="126" text-anchor="middle" fill="var(--accent)">Intune</text>
+          <g stroke="var(--apple)" stroke-width="1.4" marker-end="url(#arrow2)">
+            <line x1="207" y1="122" x2="323" y2="122"/>
+            <line x1="437" y1="122" x2="543" y2="122"/>
+            <line x1="657" y1="122" x2="743" y2="122"/>
+          </g>
+        </g>
+
+        <!-- ANDROID lane -->
+        <g font-size="12">
+          <text x="20" y="183" class="svg-ink" font-weight="700" fill="var(--android)">Android</text>
+          <text x="20" y="197" class="svg-soft" font-size="10">(Zero Touch / KNOX)</text>
+          <rect x="95" y="165" width="110" height="34" rx="6" fill="var(--android-soft)" stroke="var(--android)" stroke-width="1.3"/>
+          <text x="150" y="186" text-anchor="middle" fill="var(--android)">revendeur agréé</text>
+          <rect x="325" y="165" width="110" height="34" rx="6" fill="var(--android-soft)" stroke="var(--android)" stroke-width="1.3"/>
+          <text x="380" y="186" text-anchor="middle" fill="var(--android)">Zero Touch / KNOX</text>
+          <rect x="545" y="165" width="110" height="34" rx="6" fill="var(--android-soft)" stroke="var(--android)" stroke-width="1.3"/>
+          <text x="600" y="186" text-anchor="middle" fill="var(--android)">jeton du profil</text>
+          <rect x="745" y="165" width="110" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="800" y="186" text-anchor="middle" fill="var(--accent)">Intune</text>
+          <g stroke="var(--android)" stroke-width="1.4" marker-end="url(#arrow2)">
+            <line x1="207" y1="182" x2="323" y2="182"/>
+            <line x1="437" y1="182" x2="543" y2="182"/>
+            <line x1="657" y1="182" x2="743" y2="182"/>
+          </g>
+        </g>
+
+        <!-- LINUX lane : broken chain -->
+        <g font-size="12">
+          <text x="20" y="243" class="svg-ink" font-weight="700" fill="var(--linux)">Linux</text>
+          <line x1="95" y1="242" x2="855" y2="242" stroke="var(--linux)" stroke-width="1.3" stroke-dasharray="3 5" opacity="0.55"/>
+          <circle cx="150" cy="242" r="3" fill="var(--linux)"/>
+          <text x="180" y="238" fill="var(--linux)" font-size="11">×</text>
+          <rect x="335" y="225" width="290" height="34" rx="6" fill="var(--linux-soft)" stroke="var(--linux)" stroke-width="1.3"/>
+          <text x="480" y="246" text-anchor="middle" fill="var(--linux)" font-size="11.5">aucune chaîne — appli Intune + connexion</text>
+          <g stroke="var(--linux)" stroke-width="1.4" marker-end="url(#arrow2)">
+            <line x1="627" y1="242" x2="743" y2="242"/>
+          </g>
+          <rect x="745" y="225" width="110" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="800" y="246" text-anchor="middle" fill="var(--accent)">Intune</text>
+        </g>
+
+        <text x="450" y="285" text-anchor="middle" class="svg-soft" font-size="11.5">Trois plateformes délèguent la mise en service à un tiers ; Linux ne délègue rien, faute d'écosystème propriétaire de l'OS.</text>
+      </svg>
+    </div>
+    <figcaption>Fig. 2 — La même chaîne « revendeur → cloud fabricant → jeton → Intune » se répète trois fois ; Linux n'en a pas besoin.</figcaption>
+  </figure>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">04</span> Windows — quand Microsoft possède déjà l'identité</h2>
+
+  <div class="panel platform-panel win">
+    <span class="tag win">Windows</span>
+    <p style="margin-top:14px">Puisque Microsoft possède à la fois l'OS et Entra ID, l'enregistrement Windows tourne presque entièrement autour d'une seule question : <strong>comment l'appareil rejoint-il Entra ID ?</strong> Une fois cette jointure faite, l'inscription dans Intune suit automatiquement — ce n'est pas une étape séparée comme chez Apple ou Google.</p>
+  </div>
+
+  <p>Quatre chemins existent, chacun pour un contexte différent :</p>
+  <ul>
+    <li><strong>Jointure Entra ID directe</strong> — le cas le plus simple : un appareil neuf ou réinitialisé rejoint Entra ID pendant l'accueil (ou manuellement via <em>Accès professionnel ou scolaire</em>), et l'enregistrement automatique dans Intune bascule dès que le <em>MDM user scope</em> est activé sur le tenant.</li>
+    <li><strong>Jointure hybride (Entra Hybrid Join)</strong> — pour le parc existant, déjà joint à un Active Directory local. Microsoft Entra Connect publie un enregistrement <em>SCP</em> dans l'annuaire, qu'une tâche planifiée locale utilise pour hybrider la machine dès qu'un utilisateur ouvre une session. C'est le pont entre le monde legacy (AD) et le monde cloud (Entra ID).</li>
+    <li><strong>Co-gestion avec Configuration Manager</strong> — pour les entreprises qui gèrent encore leur parc avec ConfigMgr : au lieu de tout migrer d'un coup, on bascule <em>charge de travail par charge de travail</em> (conformité, mises à jour, sécurité…) vers Intune, le reste restant piloté par ConfigMgr.</li>
+    <li><strong>MDE-Attach</strong> — un canal <em>alternatif</em> qui ne passe pas par une vraie jointure : le mini-agent MDM intégré à Microsoft Defender for Endpoint permet de pousser des stratégies de sécurité même sur des machines non joignables (Workgroup, DMZ) ou sur des OS que Intune ne gère pas nativement (Linux serveur, macOS non enregistré).</li>
+  </ul>
+
+  <p>Deux cas particuliers illustrent bien la logique « moins d'identité = moins de contrôle » vue au point 2.5 :</p>
+  <ul>
+    <li><strong>Workgroup / BYOD</strong> — un appareil personnel peut rejoindre Intune seul (sans Entra ID), mais reste alors <em>Entra Registered</em> et non <em>joint</em> : BitLocker géré, LAPS et toutes les fonctions qui exigent une vraie jointure Entra ID sont indisponibles.</li>
+    <li><strong>Machines virtuelles Azure Virtual Desktop</strong> — gérables uniquement en mode personnel (une VM = un utilisateur), sans profils Wi-Fi ni jointure de domaine, et sans les actions à distance les plus sensibles (effacement, réinitialisation Autopilot, rotation BitLocker) : la virtualisation retire des garanties que l'on tient pour acquises sur un poste physique.</li>
+  </ul>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">05</span> Apple — deux mondes séparés par un certificat annuel</h2>
+
+  <div class="panel platform-panel apple">
+    <span class="tag apple">Apple</span>
+    <p style="margin-top:14px">Apple ne délègue jamais la relation avec l'appareil : tout enregistrement, quel qu'il soit, transite par le service de notification <strong>APNs</strong>, verrouillé derrière un certificat que <em>vous</em> devez générer sur le portail Apple et renouveler chaque année. C'est la brique ① (identité) et ② (canal) du tronc commun, condensées en un seul artefact — sans lui, rien d'autre n'est possible.</p>
+  </div>
+
+  <p>Au-dessus de ce socle, deux mondes distincts cohabitent :</p>
+
+  <h3>Le monde piloté par l'entreprise : Apple Business Manager (ABM)</h3>
+  <p>ABM est l'équivalent Apple d'Autopilot : un tenant Apple séparé (créé et <em>vérifié</em> via le numéro DUNS de l'entreprise — Apple veut être certain qu'il parle à une vraie organisation), dans lequel le revendeur dépose les appareils achetés. Un <strong>jeton annuel</strong> relie ce tenant à Intune. Chaque profil d'enregistrement ABM détaille finement l'expérience : affinité utilisateur ou non, supervision, verrouillage du profil de gestion (pour empêcher son retrait), modèle de nommage. La fédération optionnelle avec Entra ID ne remplace pas l'identité Apple — elle ne fait que simplifier la connexion des administrateurs ABM et, si vous voulez le mode <em>User Enrollment</em> pour du BYOD, elle devient obligatoire.</p>
+
+  <h3>Le monde manuel : Apple Configurator et l'enregistrement par l'utilisateur</h3>
+  <p>Sans revendeur ABM, un technicien peut préparer les appareils à la main avec <strong>Apple Configurator</strong> — le quasi-équivalent du package de provisionnement Windows Configuration Designer : il précharge un profil sur un appareil relié par câble. Et l'enregistrement le plus courant reste le plus simple : l'utilisateur télécharge le <em>portail d'entreprise</em> et s'authentifie — exactement le mode <em>Device Enrollment</em> par défaut si aucun profil de type d'enregistrement n'a été créé.</p>
+
+  <h3>Les ponts d'expérience : SSO et enregistrement juste-à-temps</h3>
+  <p>Par défaut, Apple ne « connaît » pas Entra ID. Deux mécanismes comblent ce manque, tous deux additionnels au socle ci-dessus :</p>
+  <ul>
+    <li><strong>Platform SSO (macOS)</strong> — une extension qui permet une connexion Entra ID au niveau matériel (<em>Secure Enclave</em>), avec une expérience proche de Windows Hello : plus besoin de ressaisir un mot de passe partout.</li>
+    <li><strong>Enregistrement juste-à-temps (iOS/iPadOS)</strong> — permet de terminer l'enregistrement depuis une application professionnelle (Teams, Outlook) plutôt que depuis le portail d'entreprise, en évaluant la conformité au fil de l'inscription.</li>
+  </ul>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">06</span> Android — un catalogue de modes calé sur la propriété</h2>
+
+  <div class="panel platform-panel android">
+    <span class="tag android">Android</span>
+    <p style="margin-top:14px">Contrairement à Apple qui distingue surtout <em>avec/sans affinité</em>, Google structure ses modes autour d'un axe explicite : <strong>à qui appartient l'appareil, et à quel usage est-il destiné ?</strong> D'où un catalogue plus large — cinq modes actifs — que chez les autres OS.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Mode Android Enterprise</th><th>Propriété</th><th>Profil perso ?</th><th>Cas d'usage typique</th></tr></thead>
+      <tbody>
+        <tr><th>Work Profile</th><td>Personnel (BYOD)</td><td>Oui — c'est le principe</td><td>Téléphone perso avec conteneur pro isolé</td></tr>
+        <tr><th>Fully Managed (COBO)</th><td>Entreprise</td><td>Non</td><td>Téléphone métier standard, contrôle total</td></tr>
+        <tr><th>COPE</th><td>Entreprise</td><td>Oui</td><td>Téléphone fourni, tolère un usage personnel encadré</td></tr>
+        <tr><th>Dedicated (COSU)</th><td>Entreprise</td><td>Non — sans utilisateur</td><td>Borne, POS, appareil partagé</td></tr>
+        <tr><th>AOSP</th><td>Entreprise</td><td>Non</td><td>Appareils sans services Google (casques VR/AR)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Le socle technique est le compte <strong>Managed Google Play</strong> (l'équivalent du certificat APN — sans lui, aucun mode Android Enterprise n'est disponible). L'ancien système <strong>Android Device Administrator</strong> apparaît encore dans le livre mais uniquement par contraste : Microsoft ne le supporte plus depuis janvier 2025 pour les appareils avec services Google, précisément parce qu'Android Enterprise (Managed Google Play) l'a remplacé — un bon exemple de migration d'écosystème que le certificateur peut questionner.</p>
+
+  <h3>Zero Touch et Samsung Knox : deux chemins concurrents, pas complémentaires</h3>
+  <p>Pour une même flotte Samsung, on choisit <strong>l'un ou l'autre</strong> — ce ne sont pas deux couches empilées. <strong>Android Zero Touch</strong> est le programme générique de Google (l'équivalent d'ABM chez Apple) : il fonctionne sur n'importe quelle marque Android participante, pratique si le parc mélange plusieurs constructeurs. <strong>Samsung Knox Mobile Enrollment (KME)</strong> est antérieur — Samsung a construit son propre programme avant que Google ne propose un équivalent générique, en s'appuyant sur sa puce de sécurité matérielle Knox — et reste Samsung uniquement.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Zero Touch</th><th>Samsung KME</th></tr></thead>
+      <tbody>
+        <tr><th>Couverture</th><td>N'importe quelle marque Android participante</td><td>Samsung uniquement</td></tr>
+        <tr><th>Compte utilisé</th><td>Compte Google Zero Touch</td><td>Compte Samsung Knox (indépendant de Google)</td></tr>
+        <tr><th>Compatibilité legacy</th><td>Android Enterprise uniquement</td><td>Peut aussi cibler l'ancien mode Device Administrator (Android ≤ 10)</td></tr>
+        <tr><th>Options propriétaires</th><td>Aucune</td><td>Dual DAR (double chiffrement matériel), désactivation fine des apps système, QR code préconfiguré Wi-Fi</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Au fond, les deux ne sont que des <strong>véhicules différents pour livrer la même charge utile</strong> : un paquet JSON contenant le jeton d'enregistrement Intune (<code>EXTRA_ENROLLMENT_TOKEN</code>), déposé sur l'appareil au premier démarrage. Une fois ce jeton délivré — peu importe lequel des deux chemins l'a transporté — l'appareil suit exactement le même enregistrement Android Enterprise vers Intune, puis bascule sur FCM comme n'importe quel autre appareil Android.</p>
+
+  <p>ChromeOS est traité à part et volontairement laissé de côté : Microsoft n'y a <strong>aucune gestion directe</strong> — seulement un connecteur basique vers Google Enterprise (effacement, redémarrage, inventaire). C'est le signe qu'un OS entièrement propriétaire d'un tiers (ici Google) ne laisse à Intune qu'un rôle de spectateur.</p>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">07</span> Linux — le reflet en creux de tout ce qui précède</h2>
+
+  <div class="panel platform-panel linux">
+    <span class="tag linux">Linux</span>
+    <p style="margin-top:14px">Le texte source le résume en une phrase : « ces environnements open source ne proposent pas de service de déploiement rationalisé à travers toutes les distributions ». Linux est donc la plateforme la plus simple à décrire — mais elle l'est <em>pour la même raison</em> qui rend les trois autres complexes : l'absence d'un unique propriétaire d'écosystème.</p>
+  </div>
+
+  <p>Concrètement, cela retire d'un coup trois des six points communs du chapitre 2 :</p>
+  <ul>
+    <li><strong>Pas de certificat ni de compte de liaison</strong> à instancier au préalable (point 2.1) — l'application Intune s'installe et s'authentifie directement, comme un client classique.</li>
+    <li><strong>Pas de programme d'enregistrement automatique</strong> (point 2.3) — pas de revendeur, pas de jeton, pas de profil de mise en service piloté à distance.</li>
+    <li><strong>Pas de scénario BYOD</strong> (point 2.5) — tous les appareils Linux enregistrés sont, par définition, des appareils d'entreprise.</li>
+  </ul>
+
+  <p>Ce qui reste est réduit à l'essentiel : deux distributions supportées (<strong>Ubuntu Desktop</strong> et <strong>RedHat Enterprise Linux</strong>, WSL2 explicitement exclu), un environnement graphique <strong>GNOME</strong> obligatoire, <strong>Microsoft Edge</strong> comme navigateur d'accès aux ressources d'entreprise, et l'application <em>Microsoft Intune</em> installée en ligne de commande. L'expérience utilisateur tient en trois clics : ouvrir l'application, se connecter, cliquer sur <em>Register</em>. Aucun écran de supervision, aucune affinité à choisir, aucun jeton à surveiller — parce qu'il n'y a personne, côté Linux, pour les proposer.</p>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">08</span> Mémo de synthèse</h2>
+
+  <p>Pour retenir le chapitre en un coup d'œil avant l'examen : ce qu'il faut savoir instancier <em>en premier</em>, et le mot-clé qui trahit chaque plateforme.</p>
+
+  <div class="memo">
+    <div class="cell">
+      <h4><span class="tag win">Windows</span></h4>
+      <p><strong>Prérequis n°1 :</strong> jointure Entra ID activée + CNAME DNS.<br><strong>Mot-clé :</strong> Hybrid Join, co-gestion, MDE-Attach.<br><strong>Piège :</strong> Workgroup ≠ Entra Registered ≠ Entra Joined.</p>
+    </div>
+    <div class="cell">
+      <h4><span class="tag apple">Apple</span></h4>
+      <p><strong>Prérequis n°1 :</strong> certificat APN, renouvelé chaque année (grâce : 30 jours).<br><strong>Mot-clé :</strong> ABM, DUNS, affinité utilisateur.<br><strong>Piège :</strong> User Enrollment portail d'entreprise = déprécié, seule la version <em>account driven</em> compte.</p>
+    </div>
+    <div class="cell">
+      <h4><span class="tag android">Android</span></h4>
+      <p><strong>Prérequis n°1 :</strong> compte Managed Google Play.<br><strong>Mot-clé :</strong> COBO / COPE / COSU, Zero Touch vs KNOX.<br><strong>Piège :</strong> Device Administrator est déprécié depuis janvier 2025 pour les appareils GMS.</p>
+    </div>
+    <div class="cell">
+      <h4><span class="tag linux">Linux</span></h4>
+      <p><strong>Prérequis n°1 :</strong> GNOME + Edge + paquet Intune Portal.<br><strong>Mot-clé :</strong> Ubuntu Desktop, RHEL — rien d'autre.<br><strong>Piège :</strong> pas de BYOD, pas de serveurs, WSL2 non supporté.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">À retenir avant tout le reste</span>
+    <p>Une seule question permet de reconstruire 80 % de ce chapitre sans l'avoir appris par cœur : <strong>« qui, dans cet écosystème, possède déjà l'identité de l'appareil ? »</strong> Microsoft pour Windows (enregistrement quasi automatique), Apple et Google pour leurs OS respectifs (Intune doit se brancher via un certificat/compte, un revendeur et un jeton), personne pour Linux (enregistrement réduit à une authentification simple).</p>
+  </div>
+
+  <footer>Synthèse pédagogique — Chapitre « Prérequis et enregistrement », préparation MD-102</footer>
+
+</div>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

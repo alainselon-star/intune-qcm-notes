@@ -1,0 +1,601 @@
+<title>Histoire de Microsoft Intune</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap">
+<style>
+  :root{
+    --bg:#F4F6FB;
+    --surface:#FFFFFF;
+    --surface-2:#EBF0F9;
+    --border:#D8E0EE;
+    --text:#131B2C;
+    --text-2:#4C5A75;
+    --text-3:#7688A8;
+    --accent:#1E7FB8;
+    --accent-soft:#DCEEF9;
+    --pivot:#C4770F;
+    --pivot-soft:#F8E8D2;
+    --spine:#C7D3E8;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --bg:#0B1220;
+      --surface:#121B2E;
+      --surface-2:#16213A;
+      --border:#243354;
+      --text:#E8EDF7;
+      --text-2:#9DAAC7;
+      --text-3:#6E7C9C;
+      --accent:#5AC0F0;
+      --accent-soft:#173347;
+      --pivot:#F0A857;
+      --pivot-soft:#3A2A14;
+      --spine:#2B3A5C;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B1220;
+    --surface:#121B2E;
+    --surface-2:#16213A;
+    --border:#243354;
+    --text:#E8EDF7;
+    --text-2:#9DAAC7;
+    --text-3:#6E7C9C;
+    --accent:#5AC0F0;
+    --accent-soft:#173347;
+    --pivot:#F0A857;
+    --pivot-soft:#3A2A14;
+    --spine:#2B3A5C;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px; margin:0 auto; padding:4rem 1.5rem 6rem;}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:0 0 3rem; border-bottom:1px solid var(--border); margin-bottom:1rem;}
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.75rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 0.9rem;
+  }
+  h1{
+    font-family:"IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif;
+    font-weight:700;
+    font-size:clamp(2.1rem, 5vw, 3.4rem);
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    margin:0 0 1rem;
+    text-wrap:balance;
+    color:var(--text);
+  }
+  .dek{
+    font-size:1.05rem;
+    line-height:1.6;
+    color:var(--text-2);
+    max-width:60ch;
+    margin:0 0 1.8rem;
+  }
+  .stat-row{display:flex; gap:2.2rem; flex-wrap:wrap;}
+  .stat{font-family:"IBM Plex Sans", sans-serif;}
+  .stat .n{
+    font-family:"IBM Plex Sans Condensed", sans-serif;
+    font-weight:700;
+    font-size:1.5rem;
+    color:var(--accent);
+    display:block;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l{font-size:0.78rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.08em;}
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex; gap:1.6rem; flex-wrap:wrap; align-items:center;
+    margin:1.6rem 0 0;
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.72rem;
+    color:var(--text-3);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .legend .dot{width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:0.5em; vertical-align:middle;}
+  .dot.normal{background:var(--accent);}
+  .dot.pivot{background:var(--pivot);}
+
+  /* ---------- Timeline ---------- */
+  .timeline{position:relative; margin-top:2.5rem;}
+  .spine{
+    position:absolute; left:1.3rem; top:0; bottom:0; width:2px;
+    background:var(--spine);
+  }
+
+  .era{margin-bottom:2.4rem;}
+  .era-head{
+    position:relative;
+    padding-left:3.4rem;
+    margin-bottom:1.4rem;
+  }
+  .era-range{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.82rem;
+    color:var(--accent);
+    letter-spacing:0.04em;
+  }
+  .era-title{
+    font-family:"IBM Plex Sans Condensed", sans-serif;
+    font-weight:700;
+    font-size:1.5rem;
+    margin:0.15rem 0 0.3rem;
+    color:var(--text);
+  }
+  .era-sub{
+    font-family:"IBM Plex Sans", sans-serif;
+    font-size:0.9rem;
+    color:var(--text-3);
+    margin:0;
+  }
+  .era-head::before{
+    content:"";
+    position:absolute; left:0.75rem; top:0.3rem;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--bg);
+    border:3px solid var(--accent);
+  }
+
+  .card{
+    position:relative;
+    padding-left:3.4rem;
+    margin-bottom:1.5rem;
+  }
+  .card::before{
+    content:"";
+    position:absolute; left:1rem; top:0.4rem;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--accent);
+  }
+  .card.pivot::before{
+    background:var(--pivot);
+    width:11px; height:11px; left:0.87rem; top:0.32rem;
+    box-shadow:0 0 0 3px var(--pivot-soft);
+  }
+  .year{
+    font-family:"IBM Plex Sans Condensed", sans-serif;
+    font-weight:700;
+    font-size:1.15rem;
+    color:var(--text);
+    font-variant-numeric: tabular-nums;
+    margin-right:0.6rem;
+  }
+  .card.pivot .year{color:var(--pivot);}
+  .title{
+    font-family:"IBM Plex Sans", sans-serif;
+    font-weight:600;
+    font-size:1.02rem;
+    color:var(--text);
+    display:inline;
+  }
+  .body{
+    font-size:0.97rem;
+    line-height:1.62;
+    color:var(--text-2);
+    margin:0.4rem 0 0.6rem;
+    max-width:64ch;
+  }
+  .tags{display:flex; flex-wrap:wrap; gap:0.4rem;}
+  .tag{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:0.68rem;
+    letter-spacing:0.03em;
+    color:var(--text-2);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:3px;
+    padding:0.18rem 0.5rem;
+  }
+  .card.pivot .tag.pivot-tag{
+    color:var(--pivot);
+    background:var(--pivot-soft);
+    border-color:transparent;
+    font-weight:600;
+  }
+
+  /* ---------- Closing ---------- */
+  .closing{
+    position:relative;
+    padding-left:3.4rem;
+    margin-top:2.5rem;
+  }
+  .closing::before{
+    content:"";
+    position:absolute; left:0.75rem; top:0.15rem;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--accent);
+  }
+  .closing p{
+    font-size:1.02rem;
+    line-height:1.65;
+    color:var(--text);
+    max-width:62ch;
+    margin:0;
+  }
+  .closing .big{
+    font-family:"IBM Plex Sans Condensed", sans-serif;
+    font-weight:700;
+    color:var(--accent);
+  }
+
+  @media (max-width: 560px){
+    .wrap{padding:2.5rem 1.1rem 4rem;}
+    .stat-row{gap:1.4rem;}
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="hero">
+    <p class="eyebrow">Repères historiques &middot; SC-300 / MD-102</p>
+    <h1>De Systems Management Server à Microsoft Intune</h1>
+    <p class="dek">Trente ans de gestion de parc informatique chez Microsoft&nbsp;: d'un outil sur site pensé pour le PC de bureau à une plateforme cloud pilotée par l'IA, gérant aujourd'hui des flottes iOS, Android, macOS, Linux et Windows.</p>
+    <div class="stat-row">
+      <div class="stat"><span class="n">31 ans</span><span class="l">1994 → 2025</span></div>
+      <div class="stat"><span class="n">4</span><span class="l">changements de nom</span></div>
+      <div class="stat"><span class="n">150M+</span><span class="l">appareils gérés</span></div>
+    </div>
+    <div class="legend">
+      <span><span class="dot normal"></span>évolution / fonctionnalité</span>
+      <span><span class="dot pivot"></span>changement de nom du produit</span>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="spine"></div>
+
+    <!-- ERA 1 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">1994 — 2009</div>
+        <h2 class="era-title">Avant le cloud</h2>
+        <p class="era-sub">La gestion de parc reste une affaire de serveurs sur site.</p>
+      </div>
+
+      <div class="card">
+        <span class="year">1994</span><span class="title">Systems Management Server (SMS)</span>
+        <p class="body">Premier outil Microsoft dédié à l'administration massive des postes&nbsp;: déploiement de logiciels, mises à jour, inventaire. C'est l'ancêtre direct de Configuration Manager (SCCM, ConfigMgr).</p>
+        <div class="tags"><span class="tag">SMS</span><span class="tag">on-premise</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2007</span><span class="title">Asset Inventory Service</span>
+        <p class="body">Distribué via le Microsoft Desktop Optimization Pack (MDOP) pour les clients Software Assurance, ce service se concentre sur l'inventaire et la compatibilité logicielle.</p>
+        <div class="tags"><span class="tag">MDOP</span><span class="tag">inventaire</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2008</span><span class="title">Asset Inventory Service 2.0</span>
+        <p class="body">Refonte complète en service hébergé dans le cloud, dans le sillage du virage cloud amorcé par Microsoft.</p>
+        <div class="tags"><span class="tag">cloud</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2009</span><span class="title">Projet « Florida »</span>
+        <p class="body">Porté par le succès attendu de Windows 7, Microsoft annonce à la conférence MMS le System Center Online Desktop Manager&nbsp;: un service en ligne de gestion et de sécurité du poste de travail, avec inventaire, antivirus, configuration et assistance à distance — le prototype direct d'Intune.</p>
+        <div class="tags"><span class="tag">System Center Online Desktop Manager</span><span class="tag">Silverlight</span></div>
+      </div>
+    </div>
+
+    <!-- ERA 2 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">2010 — 2013</div>
+        <h2 class="era-title">Naissance de Windows Intune</h2>
+        <p class="era-sub">Le premier vrai service cloud de gestion des postes Windows.</p>
+      </div>
+
+      <div class="card pivot">
+        <span class="year">2010</span><span class="title">System Center Online Desktop Manager devient Windows Intune</span>
+        <p class="body">Repositionné comme alternative cloud à WSUS et à Configuration Manager, sans infrastructure sur site à déployer — pour des postes en entreprise comme en mobilité.</p>
+        <div class="tags"><span class="tag pivot-tag">renommage</span><span class="tag">alternative à WSUS</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2011</span><span class="title">Disponibilité générale — 23 mars</span>
+        <p class="body">Windows Intune devient disponible pour tous, avec la gestion des mises à jour et de la sécurité. Microsoft instaure le rythme de publication en « waves », deux fois par an — un cadencement qui structurera le produit pour les quinze années suivantes.</p>
+        <div class="tags"><span class="tag">GA</span><span class="tag">waves semestrielles</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2011–13</span><span class="title">La mobilité bouscule le marché</span>
+        <p class="body">iPhone et Android imposent de nouveaux usages que l'administration historique de Microsoft ne couvre pas. Des acteurs tiers — AirWatch, MobileIron — occupent le terrain du MDM mobile.</p>
+        <div class="tags"><span class="tag">iOS</span><span class="tag">Android</span><span class="tag">AirWatch</span><span class="tag">MobileIron</span></div>
+      </div>
+    </div>
+
+    <!-- ERA 3 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">2014 — 2016</div>
+        <h2 class="era-title">Microsoft Intune et l'ère MDM</h2>
+        <p class="era-sub">Le service quitte le seul monde Windows pour devenir multiplateforme.</p>
+      </div>
+
+      <div class="card pivot">
+        <span class="year">2014</span><span class="title">Rebaptisé Microsoft Intune</span>
+        <p class="body">Intégré à la suite Enterprise Mobility + Security (EMS) aux côtés d'Azure Active Directory et d'Azure Rights Management, le service prend en charge iOS, Android, macOS et Windows Phone. En parallèle, Google lance son propre framework, Android Enterprise, pour dépasser les limites du mode historique Device Administrator.</p>
+        <div class="tags"><span class="tag pivot-tag">renommage</span><span class="tag">EMS</span><span class="tag">Azure AD</span><span class="tag">Android Enterprise</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2015</span><span class="title">Windows 10, CSP et MAM sans enregistrement</span>
+        <p class="body">Le support d'OMA-URI et des Configuration Service Providers (CSP) remplace avantageusement les stratégies de groupe. Arrivent aussi Windows Update for Business, Windows Store for Business, le premier support de macOS — et surtout une idée neuve&nbsp;: un SDK intégré aux applications (dont Office) pour appliquer des stratégies de sécurité sans avoir à inscrire l'appareil. Le BYOD devient enfin gérable sans encapsulation.</p>
+        <div class="tags"><span class="tag">CSP</span><span class="tag">Windows Update for Business</span><span class="tag">MAM sans enregistrement</span><span class="tag">macOS</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2016</span><span class="title">Cadence mensuelle et accès conditionnel</span>
+        <p class="body">Les mises à jour de service deviennent mensuelles. Les groupes Intune convergent vers ceux d'Azure AD, la restriction d'enregistrement par plateforme apparaît, et l'accès conditionnel fait son entrée dans Azure AD, s'appuyant sur la conformité Intune. Microsoft rejoint le peloton de tête des cabinets d'analystes (Gartner, Forrester, IDC).</p>
+        <div class="tags"><span class="tag">accès conditionnel</span><span class="tag">Gartner</span></div>
+      </div>
+    </div>
+
+    <!-- ERA 4 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">2017 — 2019</div>
+        <h2 class="era-title">La gestion moderne</h2>
+        <p class="era-sub">Intune apprend à cohabiter avec Configuration Manager, puis à le dépasser.</p>
+      </div>
+
+      <div class="card">
+        <span class="year">2017</span><span class="title">Cogestion et Windows Autopilot</span>
+        <p class="body">La cogestion permet de piloter un même poste Windows avec Configuration Manager et Intune, pour une transition progressive plutôt qu'un big bang. Windows Autopilot réinvente le provisionnement&nbsp;: l'appareil part directement du fabricant vers l'utilisateur, sans passer par l'IT. L'Intune Management Extension (« sidecar ») ajoute l'installation d'exécutables et de scripts PowerShell, en complément des CSP.</p>
+        <div class="tags"><span class="tag">cogestion</span><span class="tag">Windows Autopilot</span><span class="tag">Intune Management Extension</span><span class="tag">RBAC</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2018</span><span class="title">Microsoft Graph et l'accélération</span>
+        <p class="body">L'API Intune s'ouvre dans Microsoft Graph, offrant un modèle de programmation unifié aux développeurs. Le service gagne près d'un million d'appareils par mois — environ 70 millions de licences EMS ont été vendues. Samsung KNOX, le mode kiosk Android (COSU) et un connecteur avec Microsoft Defender for Endpoint complètent l'offre.</p>
+        <div class="tags"><span class="tag">Microsoft Graph</span><span class="tag">KNOX</span><span class="tag">Defender for Endpoint</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2019</span><span class="title">Security Baselines et fin de MBAM</span>
+        <p class="body">Microsoft rapatrie dans Intune la gestion de BitLocker (fin de support de MBAM), désormais accessible aux licences Windows Pro, et introduit les Security Baselines. Le portail est temporairement renommé « Microsoft 365 Device Management (DMAC) » le temps d'une refonte graphique et d'une nouvelle approche des rapports.</p>
+        <div class="tags"><span class="tag">Security Baselines</span><span class="tag">BitLocker</span><span class="tag">Desktop Analytics</span></div>
+      </div>
+    </div>
+
+    <!-- ERA 5 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">2020 — 2021</div>
+        <h2 class="era-title">Endpoint Manager et l'unification</h2>
+        <p class="era-sub">Intune, Configuration Manager et Autopilot sous une même bannière — pour un temps.</p>
+      </div>
+
+      <div class="card pivot">
+        <span class="year">2020</span><span class="title">Naissance de Microsoft Endpoint Manager</span>
+        <p class="body">Le cap des 10 millions d'appareils Windows gérés est franchi. Microsoft unifie Intune, Configuration Manager, Windows Autopilot et le nouvel Endpoint Analytics sous le nom Microsoft Endpoint Manager. Le renommage ne prendra jamais vraiment auprès des entreprises. Cette même année arrivent Microsoft Tunnel (VPN pour iOS/Android) et le nœud Endpoint Security, guichet unique pour les paramètres de sécurité.</p>
+        <div class="tags"><span class="tag pivot-tag">renommage</span><span class="tag">Endpoint Analytics</span><span class="tag">Microsoft Tunnel</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2021</span><span class="title">Settings Catalog et Windows 365</span>
+        <p class="body">Le Settings Catalog unifie les paramètres de configuration pour toutes les plateformes. Les filtres pallient les limites d'évaluation des groupes Entra ID. Windows 365 (Cloud PC) et Remote Help — très attendu depuis le retrait du support à distance historique — complètent l'offre, aux côtés du mode Android COPE et du DFCI pour configurer le BIOS à distance. L'année se referme sur le lancement de Windows 11.</p>
+        <div class="tags"><span class="tag">Settings Catalog</span><span class="tag">Windows 365</span><span class="tag">Remote Help</span><span class="tag">DFCI</span></div>
+      </div>
+    </div>
+
+    <!-- ERA 6 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">2022 — 2023</div>
+        <h2 class="era-title">Retour à Intune, et la Suite</h2>
+        <p class="era-sub">Le nom revient, la plateforme s'élargit à Linux, macOS et aux privilèges.</p>
+      </div>
+
+      <div class="card pivot">
+        <span class="year">2022</span><span class="title">Microsoft Endpoint Manager redevient Microsoft Intune</span>
+        <p class="body">Retour en arrière assumé. Microsoft lance Microsoft Intune Suite en complément du Plan 1 historique — Remote Help, gestion avancée des applications, des certificats, des privilèges — ainsi que le Plan 2 pour les appareils spécialisés (casques AR/VR, écrans de salle). Le support de Linux (et WSL) et de macOS s'étoffe nettement, avec Windows Autopatch pour automatiser les mises à jour.</p>
+        <div class="tags"><span class="tag pivot-tag">renommage</span><span class="tag">Microsoft Intune Suite</span><span class="tag">Linux</span><span class="tag">Windows Autopatch</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2023</span><span class="title">Endpoint Privilege Management</span>
+        <p class="body">EPM permet d'élever temporairement les privilèges d'un utilisateur standard, sans compte admin partagé. Windows LAPS rejoint Intune pour la rotation des mots de passe administrateurs locaux. Remote Help s'étend à Android et macOS, un connecteur ServiceNow apparaît, et la gestion des firmwares et pilotes Windows via Windows Update for Business voit enfin le jour.</p>
+        <div class="tags"><span class="tag">Endpoint Privilege Management</span><span class="tag">Windows LAPS</span><span class="tag">ServiceNow</span></div>
+      </div>
+    </div>
+
+    <!-- ERA 7 -->
+    <div class="era">
+      <div class="era-head">
+        <div class="era-range">2024 — 2025</div>
+        <h2 class="era-title">L'ère de l'IA</h2>
+        <p class="era-sub">Copilot s'invite dans la gestion des postes, PKI et analytique deviennent natifs.</p>
+      </div>
+
+      <div class="card">
+        <span class="year">2024</span><span class="title">Advanced Analytics, Cloud PKI et Security Copilot</span>
+        <p class="body">Intune Suite s'enrichit d'Advanced Analytics (chronologie détaillée par appareil, rapport batterie), d'Enterprise Application Management (catalogue d'applications prépackagées) et de Cloud PKI, une autorité de certification entièrement cloud. Microsoft Security Copilot fait son entrée avec des scénarios dédiés à Intune&nbsp;: dépannage, création de stratégies, rédaction de requêtes KQL. Une nouvelle génération de Windows Autopilot, « device preparation », est annoncée.</p>
+        <div class="tags"><span class="tag">Advanced Analytics</span><span class="tag">Cloud PKI</span><span class="tag">Security Copilot</span><span class="tag">KQL</span></div>
+      </div>
+
+      <div class="card">
+        <span class="year">2025</span><span class="title">Device Query et gestion pilotée par l'IA</span>
+        <p class="body">Device Query permet d'interroger les appareils en KQL en temps réel, et Security Copilot génère ces requêtes en langage naturel. EPM gagne le support ARM64, Windows 11 introduit les mises à jour à chaud sans redémarrage, et de nouveaux agents Security Copilot commencent à agir eux-mêmes face aux vulnérabilités détectées.</p>
+        <div class="tags"><span class="tag">Device Query</span><span class="tag">ARM64</span><span class="tag">agents IA</span></div>
+      </div>
+    </div>
+
+    <div class="closing">
+      <p>Trente ans après Systems Management Server, Microsoft Intune gère aujourd'hui plus de <span class="big">150 millions d'appareils</span> dans le monde — Windows, iOS, Android, macOS et Linux confondus, avec une plateforme entièrement cloud et, désormais, assistée par l'IA.</p>
+    </div>
+
+  </div>
+</div>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

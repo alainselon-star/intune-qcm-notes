@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Intune — Fonctionnalités</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-plan1: #1f7a4d;
+    --tag-plan1-bg: #e6f5ec;
+    --tag-suite: #a15c00;
+    --tag-suite-bg: #fdf1de;
+    --tag-na: #6a6f7a;
+    --tag-na-bg: #f0f1f3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 {
+    font-size: 1.9rem;
+    margin: 0 0 6px;
+  }
+  header.title-block p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 .num {
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  h3 {
+    font-size: 1.05rem;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  p { margin: 10px 0; }
+  .intro {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+  .lifecycle {
+    list-style: none;
+    margin: 18px 0;
+    padding: 0;
+    counter-reset: step;
+  }
+  .lifecycle li {
+    counter-increment: step;
+    position: relative;
+    padding: 14px 16px 14px 52px;
+    margin-bottom: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .lifecycle li::before {
+    content: counter(step);
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lifecycle li strong {
+    display: block;
+    margin-bottom: 2px;
+  }
+  .lifecycle li span {
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+  .focus-box {
+    background: var(--accent-soft);
+    border: 1px solid #c9dcfb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+  }
+  .focus-box strong { display: block; margin-bottom: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .tag-plan1 { color: var(--tag-plan1); background: var(--tag-plan1-bg); }
+  .tag-suite { color: var(--tag-suite); background: var(--tag-suite-bg); }
+  .tag-na { color: var(--tag-na); background: var(--tag-na-bg); }
+  .note {
+    font-size: 0.9rem;
+    color: var(--muted);
+    border-left: 3px solid var(--border);
+    padding: 8px 14px;
+    margin: 14px 0;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .service-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--card-bg);
+  }
+  .service-card h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .service-card p {
+    margin: 0;
+    font-size: 0.93rem;
+    color: var(--text);
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title-block">
+    <h1>Microsoft Intune — Fonctionnalités</h1>
+    <p>Fiche de synthèse du chapitre « Fonctionnalités de Microsoft Intune »</p>
+  </header>
+
+  <p class="intro">Microsoft Intune est un produit d'administration du parc informatique permettant de gérer postes de travail, périphériques mobiles et environnements virtuels, sur Android, AOSP, iOS/iPadOS, Linux, macOS et Windows. Cette fiche organise le chapitre autour de deux fils rouges — le cycle de vie du terminal et le cycle de vie de l'application — puis détaille les services complémentaires et leur rattachement de licence.</p>
+
+  <h2><span class="num">1.</span>Cycle de vie du terminal</h2>
+  <p>Le texte présente ces éléments comme des fonctionnalités distinctes et parallèles ; les regrouper ainsi aide à retenir l'ensemble, mais chaque brique garde son nom propre.</p>
+  <ol class="lifecycle">
+    <li><strong>Préparation et mise en service</strong><span>Windows Autopilot (Windows), Apple Business Manager / Setup Assistant (iOS/iPadOS, macOS), Samsung KNOX ou Google ZeroTouch (Android). Le système n'est pas redéployé : il est configuré et préparé selon les besoins de l'organisation.</span></li>
+    <li><strong>Enregistrement et actions à distance</strong><span>C'est le nom exact, au sens strict du texte, de « Gestion des terminaux et appareils » : enrôlement dans Intune puis effacement, synchronisation, réinitialisation du code PIN à distance.</span></li>
+    <li><strong>Configuration</strong><span>Stratégies via modèles ou catalogue de paramétrages, ciblage par groupes ; scripts (Linux, macOS, Windows) et remédiations (Windows) pour les besoins non couverts nativement.</span></li>
+    <li><strong>Accès aux ressources de l'entreprise</strong><span>Provisionnement de profils Wi-Fi, VPN, e-mail, certificats — pour réduire les opérations du helpdesk.</span></li>
+    <li><strong>Inventaire matériel et logiciel</strong><span>Visibilité précise sur l'état du parc : types de machines, versions logicielles en circulation.</span></li>
+    <li><strong>Mises à jour</strong><span>Windows Update for Business (Windows), mécanismes Apple et Android natifs + FOTA, gestion des drivers/firmwares et des montées de version.</span></li>
+    <li><strong>Protection du terminal</strong><span>Microsoft Defender (Antivirus, for Endpoint, SmartScreen, Exploit Guard, Application Guard, Application Control), gestion des comptes administrateurs locaux, chiffrement (BitLocker/FileVault), pare-feu.</span></li>
+    <li><strong>Conformité</strong><span>Stratégies de conformité (antivirus, mises à jour, mot de passe, chiffrement…) ; le statut alimente l'accès conditionnel de Microsoft Entra ID.</span></li>
+    <li><strong>Reporting</strong><span>Plus de 50 rapports avec vues opérationnelles par fonction, et possibilité de bâtir ses propres tableaux de bord via Power BI ou l'API Microsoft Graph.</span></li>
+  </ol>
+
+  <h2><span class="num">2.</span>Cycle de vie de l'application</h2>
+  <ol class="lifecycle">
+    <li><strong>Acquisition / packaging</strong><span>Historiquement l'étape la plus lourde (repackaging, méthodes de détection, lignes de commande d'installation/désinstallation). Simplifiée aujourd'hui par le catalogue d'Enterprise App Management (applications prépackagées et sécurisées par Microsoft).</span></li>
+    <li><strong>Déploiement</strong><span>Depuis les sources natives par plateforme — Win32 (exe, MSI, MSIX), Android (APK), iOS/iPadOS (IPA), macOS (DMG/PKG) — ou via interconnexion à un store privé. L'installation passe techniquement par l'Intune Management Extension (IME).</span></li>
+    <li><strong>Configuration</strong><span>Paramétrage des applications une fois déployées.</span></li>
+    <li><strong>Mise à jour</strong><span>Maintien à jour des applications déployées.</span></li>
+    <li><strong>Retrait</strong><span>Désinstallation quand l'application n'est plus nécessaire.</span></li>
+    <li><strong>Protection (MAM)</strong><span>« Protection des applications » : via le SDK Intune intégré à l'app, conditions d'accès (PIN, mot de passe) et protection des données (blocage extraction/sauvegarde), sans nécessiter l'enregistrement du terminal (BYOD, périphérique d'une autre organisation).</span></li>
+  </ol>
+
+  <div class="focus-box">
+    <strong>Deux volets mis en avant spécifiquement</strong>
+    Gestion de Microsoft 365 Apps (déploiement et configurations dédiées à Office) et gestion de Microsoft Edge (scénarios avancés dédiés au navigateur) — traités comme fonctionnalités à part entière dans le texte, au même titre que le reste.
+  </div>
+
+  <h2><span class="num">3.</span>Rattachement des fonctionnalités générales</h2>
+  <p>L'ensemble des 13 points ci-dessus (terminaux + applications) constitue le socle du service et fait partie de <strong>Microsoft Intune Plan 1</strong> — c'est explicite dans le texte : « Ces fonctionnalités principales font partie de Microsoft Intune Plan 1 et constituent le cœur du service. »</p>
+
+  <h2><span class="num">4.</span>Services complémentaires</h2>
+  <p class="intro">Au-delà du socle, le chapitre détaille huit services additionnels. Le texte ne précise pas systématiquement leur palier de licence : quand il le fait, c'est indiqué ci-dessous ; sinon, la fiche le signale plutôt que de deviner.</p>
+
+  <div class="services-grid">
+
+    <div class="service-card">
+      <h4>Windows Autopilot <span class="tag tag-na">Non précisé</span></h4>
+      <p>Prépare/configure Windows sans redéploiement du système. Scénarios : conduit par l'utilisateur (user-driven), auto-déployé (self-deploying, sans utilisateur attitré), préconfiguré (pre-provisioned, préparé en amont par l'IT/revendeur), pour périphériques existants (migration AD → Entra ID), et réinitialisation Autopilot. Nouvelle mouture : « préparation de l'appareil » (device preparation), Windows 11 uniquement, mode user-driven + Entra ID seulement pour l'instant.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Windows Autopatch / Windows Update for Business <span class="tag tag-na">Licence Windows Entreprise</span></h4>
+      <p>Windows Update for Business seul est gratuit. Windows Autopatch et le service de déploiement de Windows Update for Business (Deployment Services) requièrent une licence Windows Entreprise — c'est une exigence de licence Windows, distincte du couple Plan 1 / Intune Suite.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Endpoint Analytics <span class="tag tag-na">Non précisé</span></h4>
+      <p>Service cloud intégré à Intune, basé sur la télémétrie, pour l'expérience utilisateur et la réduction des coûts de support.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Advanced Analytics <span class="tag tag-suite">Intune Suite</span></h4>
+      <p>Extension d'Endpoint Analytics : détection d'anomalies, gestion des périmètres d'appareils, chronologies améliorées, requêtage en temps réel, rapport sur l'état des batteries. Explicitement rattaché à Intune Suite dans le texte.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Cloud PKI <span class="tag tag-na">Non précisé</span></h4>
+      <p>PKI cloud dédiée, sans serveurs/connecteurs/matériel sur site. Émission, renouvellement, révocation de certificats sur toutes les plateformes Intune, via SCEP. Architecture à deux niveaux, option BYOCA (autorité racine existante).</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Remote Help <span class="tag tag-na">Non précisé</span></h4>
+      <p>Support à distance basé sur le cloud, contrôle d'accès par rôles, visualisation ou prise de contrôle total de l'appareil (avec autorisation), connecteur avec ServiceNow pour la remontée d'incidents.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Enterprise App Management <span class="tag tag-na">Non précisé</span></h4>
+      <p>Catalogue d'applications prépackagées et sécurisées par Microsoft, déployables en quelques clics depuis la console Intune. Réduit fortement le travail de packaging et de tests. Installation via l'IME.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Microsoft Tunnel <span class="tag tag-na">Base : non précisé — <span class="tag tag-suite" style="margin-left:4px;">volet MAM/BYOD : Intune Suite</span></span></h4>
+      <p>Passerelle VPN pour iOS/iPadOS et Android Enterprise gérés, authentification moderne, accès conditionnel Entra ID, SSO, tunneling fractionné (M365 dans un tunnel dédié), exécutée en conteneur sur serveur Linux. Pour Windows/macOS/Linux : AlwaysOn VPN recommandé. L'usage par des applications MAM sur périphériques non enregistrés (BYOD) est explicitement réservé aux souscripteurs d'Intune Suite.</p>
+    </div>
+
+    <div class="service-card">
+      <h4>Endpoint Privilege Management (EPM) <span class="tag tag-suite">Intune Suite</span></h4>
+      <p>Permet à un utilisateur standard (sans droits admin) d'exécuter des tâches nécessitant des privilèges élevés, via des élévations contrôlées et tracées (automatiques ou par approbation), ciblées par groupes Entra ID. Réduit la surface d'attaque liée aux comptes admin. Explicitement rattaché à Intune Suite dans le texte.</p>
+    </div>
+
+  </div>
+
+  <h2><span class="num">5.</span>Récapitulatif des licences</h2>
+  <table>
+    <thead>
+      <tr><th>Fonctionnalité / service</th><th>Palier selon le texte</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Les 13 fonctionnalités générales (terminaux + applications, section 1)</td><td><span class="tag tag-plan1">Intune Plan 1</span></td></tr>
+      <tr><td>Windows Autopilot</td><td><span class="tag tag-na">Non précisé</span></td></tr>
+      <tr><td>Windows Autopatch / WUfB Deployment Services</td><td>Licence Windows Entreprise (dimension distincte)</td></tr>
+      <tr><td>Endpoint Analytics</td><td><span class="tag tag-na">Non précisé</span></td></tr>
+      <tr><td>Advanced Analytics</td><td><span class="tag tag-suite">Intune Suite</span></td></tr>
+      <tr><td>Cloud PKI</td><td><span class="tag tag-na">Non précisé</span></td></tr>
+      <tr><td>Remote Help</td><td><span class="tag tag-na">Non précisé</span></td></tr>
+      <tr><td>Enterprise App Management</td><td><span class="tag tag-na">Non précisé</span></td></tr>
+      <tr><td>Microsoft Tunnel (usage standard)</td><td><span class="tag tag-na">Non précisé</span></td></tr>
+      <tr><td>Microsoft Tunnel (via MAM, périphérique non enregistré)</td><td><span class="tag tag-suite">Intune Suite</span></td></tr>
+      <tr><td>Endpoint Privilege Management (EPM)</td><td><span class="tag tag-suite">Intune Suite</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note">Les cases « Non précisé » signalent que le chapitre ne donne pas l'information — il ne faut pas en déduire un palier par défaut. Pour une réponse certaine sur le positionnement commercial actuel, se référer à la documentation Microsoft à jour.</p>
+
+  <footer>
+    Fiche de synthèse basée sur le chapitre « Fonctionnalités de Microsoft Intune ».
+  </footer>
+
+</div>
+</body>
+</html>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

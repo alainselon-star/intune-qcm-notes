@@ -1,0 +1,502 @@
+<title>Windows 365</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#EEF1F4; --surface:#FFFFFF; --panel:#E4E9EF;
+    --ink:#16202C; --ink-soft:#4B5A6B; --line:#C9D2DB;
+    --accent:#2458C4; --accent-soft:#E1E9FA;
+    --good:#2E7D4F; --good-soft:#DFF0E4;
+    --warn:#A85A17; --warn-soft:#F5E5D2;
+    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F151C; --surface:#161E27; --panel:#1B2530;
+      --ink:#E7ECF1; --ink-soft:#9FB0C0; --line:#2A3946;
+      --accent:#7FA8F5; --accent-soft:#1C2A44;
+      --good:#7FCB9A; --good-soft:#1A2E22;
+      --warn:#E3A365; --warn-soft:#2E2416;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F151C; --surface:#161E27; --panel:#1B2530;
+    --ink:#E7ECF1; --ink-soft:#9FB0C0; --line:#2A3946;
+    --accent:#7FA8F5; --accent-soft:#1C2A44;
+    --good:#7FCB9A; --good-soft:#1A2E22;
+    --warn:#E3A365; --warn-soft:#2E2416;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size:17.5px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  .wrap{ max-width:800px; margin:0 auto; padding:64px 24px 120px; }
+
+  .backlinks{ display:flex; flex-wrap:wrap; gap:16px; margin-bottom:22px; }
+  .backlink{
+    font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:12px; color:var(--ink-soft);
+    text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+  }
+  .backlink:hover{ color:var(--accent); }
+
+  .eyebrow{
+    font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:12px; font-weight:600;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background:var(--accent); display:inline-block; }
+
+  h1{
+    font-family:"Archivo","Segoe UI",sans-serif; font-weight:800;
+    font-size:clamp(30px,5vw,44px); line-height:1.08; letter-spacing:-.01em;
+    margin:14px 0 16px; text-wrap:balance;
+  }
+  .dek{ font-size:19px; color:var(--ink-soft); max-width:62ch; margin:0 0 8px; text-wrap:balance; }
+  .intro{ margin-top:28px; padding-top:28px; border-top:1px solid var(--line); }
+
+  h2{
+    font-family:"Archivo","Segoe UI",sans-serif; font-weight:800; font-size:26px;
+    letter-spacing:-.005em; margin:64px 0 6px; text-wrap:balance;
+    display:flex; align-items:baseline; gap:12px;
+  }
+  h2 .num{
+    font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:600; color:var(--accent);
+    background:var(--accent-soft); border-radius:5px; padding:3px 8px;
+  }
+  h3{ font-family:"Archivo","Segoe UI",sans-serif; font-weight:700; font-size:18.5px; margin:34px 0 8px; letter-spacing:-.003em; }
+  p{ margin:0 0 16px; max-width:66ch; }
+  ul,ol{ margin:0 0 16px; padding-left:1.3em; max-width:64ch; }
+  li{ margin:0 0 8px; }
+  strong{ font-weight:600; color:var(--ink); }
+  code{ font-family:"IBM Plex Mono",monospace; font-size:.86em; background:var(--panel); padding:.1em .38em; border-radius:4px; color:var(--ink); }
+  a{ color:var(--accent); }
+  .lede{ font-size:19px; color:var(--ink-soft); }
+
+  .panel{
+    position:relative; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:26px 28px; margin:20px 0 28px; box-shadow:var(--shadow);
+    border-left:3px solid var(--accent);
+  }
+  .panel::before, .panel::after{ content:""; position:absolute; width:10px; height:10px; border-color:var(--line); border-style:solid; }
+  .panel::before{ top:-1px; left:-1px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+  .panel::after{ bottom:-1px; right:-1px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
+
+  .callout{
+    background:var(--accent-soft); border:1px solid var(--line); border-radius:10px;
+    padding:18px 22px; margin:22px 0; font-size:16px;
+  }
+  .callout.warn{ background:var(--warn-soft); }
+  .callout .lbl{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent); display:block; margin-bottom:6px;
+  }
+  .callout.warn .lbl{ color:var(--warn); }
+  .callout p:last-child{ margin-bottom:0; }
+
+  .table-wrap{ overflow-x:auto; margin:20px 0 28px; border:1px solid var(--line); border-radius:10px; }
+  table{ border-collapse:collapse; width:100%; min-width:520px; font-size:15px; }
+  thead th{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-soft); text-align:left; padding:12px 16px;
+    background:var(--panel); border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  tbody th{ text-align:left; font-family:"Archivo",sans-serif; font-weight:700; font-size:14px; padding:12px 16px; color:var(--ink); white-space:nowrap; background:var(--surface); }
+  tbody td{ padding:12px 16px; border-top:1px solid var(--line); vertical-align:top; background:var(--surface); color:var(--ink-soft); font-size:14.5px; line-height:1.5; }
+  tbody tr:first-child td{ border-top:none; }
+  td.yes{ color:var(--good); font-weight:600; }
+  td.no{ color:var(--warn); font-weight:600; }
+
+  figure{ margin:26px 0 30px; }
+  .fig-frame{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px 16px 10px; overflow-x:auto; }
+  figcaption{ font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-soft); margin-top:10px; text-align:center; }
+  svg text{ font-family:"IBM Plex Mono",monospace; }
+  .svg-ink{ color:var(--ink); }
+  .svg-soft{ color:var(--ink-soft); }
+  .svg-line{ color:var(--line); }
+
+  hr.sep{ border:none; border-top:1px solid var(--line); margin:56px 0; }
+
+  .memo{ display:grid; grid-template-columns:1fr; gap:12px; margin:20px 0 30px; }
+  @media (min-width:640px){ .memo{ grid-template-columns:1fr 1fr; } }
+  .memo .cell{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; background:var(--surface); }
+  .memo .cell h4{ margin:0 0 8px; font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--accent); }
+  .memo .cell p{ margin:0; font-size:14.5px; color:var(--ink-soft); }
+
+  footer{ margin-top:70px; padding-top:24px; border-top:1px solid var(--line); font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-soft); }
+  ::-webkit-scrollbar{ height:8px; }
+</style>
+
+<div class="wrap">
+
+  <div class="backlinks">
+    <a class="backlink" href="https://claude.ai/code/artifact/ca2cc3af-e523-419b-bfba-1346e33256b4">← Enrôlement des appareils Intune</a>
+    <a class="backlink" href="https://claude.ai/code/artifact/87e91d25-5a51-4fc6-a282-edd99069cc2c">← Windows Autopilot</a>
+  </div>
+
+  <div class="eyebrow">MD-102 · Provisionnement des appareils Windows</div>
+  <h1>Windows 365 — le PC qui naît déjà enregistré</h1>
+  <p class="dek">Un PC dans le cloud n'a pas besoin d'être « enrôlé » : il naît déjà joint à Entra ID et déjà inscrit dans Intune. Ce que la virtualisation complique, en échange, c'est tout autre chose — le réseau et le partage entre utilisateurs.</p>
+
+  <div class="intro">
+    <p class="lede">Ce n'est ni Windows Autopilot ni Microsoft 365 — les deux confusions les plus courantes. Windows 365 est un service <strong>Desktop-as-a-Service (DaaS)</strong> : Microsoft provisionne une machine virtuelle Windows complète, accessible depuis n'importe quel appareil connecté à Internet. Le point de départ pour comprendre ce chapitre : contrairement à tout ce qu'on a vu jusqu'ici, il n'y a <strong>aucun enregistrement</strong> à proprement parler — pas d'OOBE à observer, pas de hash à collecter. Le PC existe déjà « géré » au moment même où il est créé.</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">01</span> Le concept : un PC qui n'existe pas tant que personne n'y touche</h2>
+
+  <p>Reprenons le tronc commun des fiches précédentes — identité, canal, profil. Pour un PC physique, ces trois briques se construisent <em>pendant</em> le déballage de la machine. Pour un Cloud PC, elles sont déjà posées <strong>avant même que la machine virtuelle existe</strong> : dès qu'un administrateur assigne une licence et une stratégie de provisionnement à un utilisateur, Azure crée la VM directement jointe (Entra ID ou Entra Hybrid) et directement inscrite dans Intune. Il n'y a jamais d'écran d'accueil à traverser pour l'IT.</p>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 900 150" role="img" aria-label="Cycle de vie d'un Cloud PC : licence et stratégie de provisionnement assignées à un utilisateur, création de la machine virtuelle par Azure à partir d'une image, jointure et inscription Intune automatiques, puis accès via l'application Windows ou le site web.">
+        <defs>
+          <marker id="arrowC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <line x1="50" y1="75" x2="850" y2="75" stroke="currentColor" class="svg-line" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <g font-size="10.8" class="svg-ink" text-anchor="middle">
+          <circle cx="50" cy="75" r="5" fill="var(--accent)"/>
+          <text x="50" y="102">Licence +</text>
+          <text x="50" y="115" class="svg-soft" font-size="9.5">stratégie assignées</text>
+          <circle cx="240" cy="75" r="5" fill="var(--accent)"/>
+          <text x="240" y="102">Azure crée la VM</text>
+          <text x="240" y="115" class="svg-soft" font-size="9.5">depuis une image</text>
+          <circle cx="430" cy="75" r="5" fill="var(--accent)"/>
+          <text x="430" y="102">Jointure Entra</text>
+          <text x="430" y="115" class="svg-soft" font-size="9.5">automatique</text>
+          <circle cx="620" cy="75" r="5" fill="var(--accent)"/>
+          <text x="620" y="102">Inscription Intune</text>
+          <text x="620" y="115" class="svg-soft" font-size="9.5">automatique</text>
+          <circle cx="850" cy="75" r="5" fill="var(--good)"/>
+          <text x="850" y="50" fill="var(--good)" font-weight="700">Accès utilisateur</text>
+          <text x="850" y="102">App Windows /</text>
+          <text x="850" y="115" class="svg-soft" font-size="9.5">windows365.microsoft.com</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Fig. 1 — Aucune étape n'attend d'action humaine avant le dernier maillon : le Cloud PC arrive déjà « géré ».</figcaption>
+  </figure>
+
+  <p>Ce que la fiche Autopilot appelait le « profil de mise en service » devient ici la <strong>stratégie de provisionnement</strong> — même rôle, contexte différent. Et comme il n'y a plus de matériel physique à acheter ni de hash à gérer, la complexité se déplace ailleurs : vers la question du <strong>réseau</strong> (comment cette VM, qui vit dans un datacenter Microsoft, atteint vos ressources internes ?) et celle du <strong>partage</strong> (combien de personnes une seule licence peut-elle servir ?).</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">02</span> Deux familles de licence, deux logiques de partage</h2>
+
+  <p>Windows 365 se vend en deux familles, pensées pour deux réalités de poste de travail différentes.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Enterprise</th><th>Frontline — Dedicated</th><th>Frontline — Shared</th></tr></thead>
+      <tbody>
+        <tr><th>Public visé</th><td>Employés de bureau</td><td>Terrain, usage à temps partiel (horaires postés)</td><td>Terrain, usage court sans besoin de conserver les données</td></tr>
+        <tr><th>Ce qu'une licence fournit</th><td>Un Cloud PC, accès permanent</td><td>Jusqu'à 3 Cloud PC utilisables de façon non simultanée, chacun assigné à un seul utilisateur</td><td>Un Cloud PC partagé par un groupe d'utilisateurs, non simultané</td></tr>
+        <tr><th>Sessions concurrentes par licence</th><td>1</td><td>1</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Le principe commun aux deux modes Frontline : la licence finance la <strong>rotation</strong>, pas la <strong>concurrence</strong>. Une seule session à la fois, quel que soit le nombre de Cloud PC ou d'utilisateurs rattachés — exactement la logique déjà vue pour les appareils Android <em>Dedicated</em> ou Apple en mode partagé : moins de contrôle individuel, en échange d'un coût par utilisateur bien inférieur.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">03</span> Le réseau : la vraie complexité de Windows 365</h2>
+
+  <p>Un PC physique est déjà sur votre réseau d'entreprise dès qu'il y est branché. Un Cloud PC, lui, naît dans un datacenter Azure — encore faut-il décider comment il atteint le reste du monde. Deux options, avec un arbitrage clair entre simplicité et intégration réseau.</p>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 900 260" role="img" aria-label="Deux modèles réseau pour un Cloud PC : le réseau hébergé par Microsoft donne uniquement un accès Internet, tandis que la connexion réseau Azure relie le Cloud PC au réseau interne de l'entreprise via un tunnel VPN site à site ou un circuit ExpressRoute.">
+        <defs>
+          <marker id="arrowN" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- lane 1: Microsoft-hosted -->
+        <g font-size="12">
+          <text x="10" y="35" class="svg-ink" font-weight="700">Réseau hébergé</text>
+          <text x="10" y="49" class="svg-soft" font-size="10">par Microsoft</text>
+          <rect x="230" y="18" width="150" height="40" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+          <text x="305" y="43" text-anchor="middle" fill="var(--accent)">Cloud PC</text>
+          <rect x="500" y="18" width="150" height="40" rx="8" fill="none" stroke="currentColor" class="svg-ink" stroke-width="1.4"/>
+          <text x="575" y="43" text-anchor="middle" class="svg-ink">Internet</text>
+          <g stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrowN)">
+            <line x1="382" y1="38" x2="498" y2="38"/>
+          </g>
+          <text x="750" y="43" text-anchor="middle" class="svg-soft" font-size="10.5">pas d'accès direct</text>
+          <text x="750" y="57" text-anchor="middle" class="svg-soft" font-size="10.5">au réseau interne</text>
+        </g>
+
+        <line x1="10" y1="95" x2="890" y2="95" stroke="currentColor" class="svg-line" stroke-width="1"/>
+
+        <!-- lane 2: ANC -->
+        <g font-size="12">
+          <text x="10" y="135" class="svg-ink" font-weight="700">Connexion réseau</text>
+          <text x="10" y="149" class="svg-soft" font-size="10">Azure (ANC)</text>
+          <rect x="230" y="118" width="150" height="40" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.4"/>
+          <text x="305" y="143" text-anchor="middle" fill="var(--accent)">Cloud PC</text>
+          <rect x="440" y="118" width="150" height="40" rx="8" fill="none" stroke="currentColor" class="svg-ink" stroke-width="1.4"/>
+          <text x="515" y="138" text-anchor="middle" class="svg-ink">Réseau virtuel</text>
+          <text x="515" y="152" text-anchor="middle" class="svg-soft" font-size="9.5">Azure (VNet)</text>
+          <rect x="660" y="118" width="180" height="40" rx="8" fill="none" stroke="currentColor" class="svg-ink" stroke-width="1.4" stroke-dasharray="3 3"/>
+          <text x="750" y="138" text-anchor="middle" class="svg-ink">Réseau interne</text>
+          <text x="750" y="152" text-anchor="middle" class="svg-soft" font-size="9.5">via VPN S2S / ExpressRoute</text>
+          <g stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrowN)">
+            <line x1="382" y1="138" x2="438" y2="138"/>
+            <line x1="592" y1="138" x2="658" y2="138"/>
+          </g>
+        </g>
+
+        <text x="450" y="200" text-anchor="middle" class="svg-soft" font-size="11">L'Entra Hybrid Join exige toujours la connexion Azure — impossible d'y accéder via le réseau hébergé par Microsoft.</text>
+        <text x="450" y="222" text-anchor="middle" class="svg-soft" font-size="11">L'ANC seule débloque aussi NSG, Azure Firewall, appliances réseau virtuelles (NVA).</text>
+      </svg>
+    </div>
+    <figcaption>Fig. 2 — Le choix réseau n'est pas qu'une question de performance : il détermine si le Cloud PC peut voir votre réseau interne, et donc s'il peut faire de la jointure hybride.</figcaption>
+  </figure>
+
+  <p>Le <strong>réseau hébergé par Microsoft</strong> est l'option zéro-configuration : un accès Internet fonctionnel en quelques clics, mais aucune visibilité sur vos ressources internes. La <strong>connexion réseau Azure</strong> (ANC) demande la mise en place préalable d'un réseau virtuel et d'une interconnexion (VPN site à site ou ExpressRoute) — en échange, le Cloud PC devient un citoyen à part entière de votre réseau, avec les mêmes outils de sécurité réseau (NSG, Azure Firewall) que n'importe quelle VM Azure. C'est aussi la <strong>seule</strong> option qui permette l'Entra Hybrid Join, puisque le Cloud PC doit alors atteindre un contrôleur de domaine Active Directory — invisible depuis le réseau hébergé par Microsoft.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">04</span> Les images : d'où vient le système installé</h2>
+
+  <p>Deux sources possibles pour le disque système d'un Cloud PC neuf.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Image de la galerie</th><th>Image personnalisée</th></tr></thead>
+      <tbody>
+        <tr><th>Qui la maintient</th><td>Microsoft — mise à jour mensuelle</td><td>Vous</td></tr>
+        <tr><th>Contenu</th><td>Apps Microsoft 365 + Teams préinstallés, optimisations d'appels (redirecteur WebRTC)</td><td>Ce que vous y mettez</td></tr>
+        <tr><th>Contraintes</th><td>Aucune</td><td>Génération 2, généralisée (Sysprep), session unique, jamais jointe à un annuaire au préalable, ≤ 64 Go</td></tr>
+        <tr><th>Origine</th><td>—</td><td>VHD uploadé ou capture d'une VM Azure (recommandé)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>La contrainte « jamais jointe à Active Directory, Entra ID, Intune ou Configuration Manager au préalable » n'est pas anodine : une image personnalisée doit être un <strong>socle neutre</strong>, sans trace d'une identité antérieure — exactement le même principe que la généralisation Sysprep utilisée depuis des années en déploiement de systèmes d'exploitation classique, transposé à l'univers cloud.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">05</span> La stratégie de provisionnement : où tout s'assemble</h2>
+
+  <p>C'est le point de convergence de toutes les briques précédentes. Une stratégie de provisionnement définit, pour un groupe d'utilisateurs donné : le type de licence (Enterprise ou Frontline Dedicated/Shared), le type de jointure (Entra Join ou Entra Hybrid Join), le réseau (hébergé Microsoft ou connexion Azure), l'activation du SSO, l'image à utiliser, la langue/région, un éventuel modèle de nommage (<code>%USERNAME:X%</code>, <code>%RAND:X%</code>), et l'usage optionnel de <strong>Windows Autopatch</strong> pour la gestion des mises à jour — sauf pour le mode Frontline partagé, où l'absence de propriétaire unique rend la notion de cycle de mise à jour personnel peu pertinente.</p>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">06</span> Trois extensions matérielles, trois promesses différentes</h2>
+
+  <p>Windows 365 ne se limite pas à un accès distant classique : trois fonctionnalités rapprochent l'expérience du poste physique traditionnel, chacune avec ses propres prérequis.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Windows 365 Boot</th><th>Windows 365 Switch</th><th>Windows 365 Link</th></tr></thead>
+      <tbody>
+        <tr><th>Promesse</th><td>Le PC physique démarre <em>directement</em> dans son Cloud PC, à l'allumage</td><td>Basculer rapidement entre l'environnement local et le Cloud PC</td><td>Un boîtier dédié, conçu par Microsoft comme client léger</td></tr>
+        <tr><th>Prérequis matériel</th><td>Windows 11 Pro/Enterprise/IoT Enterprise récent</td><td>Windows 11 Pro/Enterprise récent, des deux côtés</td><td>Le boîtier Windows 365 Link lui-même</td></tr>
+        <tr><th>Prérequis particulier</th><td class="warn"><strong>Enregistré dans Windows Autopilot</strong> + ajouté à un groupe Entra dédié</td><td>Application Windows installée</td><td>SSO Windows 365 activé, prérequis réseau standards</td></tr>
+        <tr><th>Public</th><td>Frontline (Dedicated/Shared uniquement)</td><td>Tout utilisateur avec un poste physique</td><td>Postes dédiés uniquement au Cloud PC</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">Le pont avec la fiche Autopilot</span>
+    <p>Windows 365 Boot est le seul endroit où les deux mondes de ce mini-parcours se rencontrent explicitement : la machine physique doit être <strong>enregistrée dans le service Windows Autopilot</strong> — exactement le mécanisme détaillé dans la fiche précédente — avant de pouvoir démarrer directement dans un Cloud PC. Un PC physique « anonyme » ne peut pas utiliser cette fonctionnalité.</p>
+  </div>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">07</span> Mémo de synthèse</h2>
+
+  <div class="memo">
+    <div class="cell">
+      <h4>Ce n'est ni Autopilot ni M365</h4>
+      <p>Windows 365 = un PC virtuel dans le cloud (DaaS). Aucun enregistrement à observer : il naît déjà géré.</p>
+    </div>
+    <div class="cell">
+      <h4>Enterprise vs Frontline</h4>
+      <p>Enterprise = un utilisateur, un Cloud PC. Frontline = rotation entre plusieurs Cloud PC ou plusieurs utilisateurs, jamais de concurrence.</p>
+    </div>
+    <div class="cell">
+      <h4>Le vrai arbitrage : le réseau</h4>
+      <p>Hébergé Microsoft = simple, Internet seulement. Connexion Azure (ANC) = intégré à votre réseau, obligatoire pour l'Entra Hybrid Join.</p>
+    </div>
+    <div class="cell">
+      <h4>Boot exige Autopilot</h4>
+      <p>Seule fonctionnalité Windows 365 qui redemande un enregistrement Autopilot classique — sur la machine physique, pas sur le Cloud PC.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">À retenir avant tout le reste</span>
+    <p>Windows 365 déplace la question de « comment enregistrer cet appareil » vers « où faire vivre cet appareil ». La jointure et l'inscription Intune sont automatiques et non négociables ; ce qui reste à décider, c'est uniquement le réseau que le Cloud PC pourra voir, l'image dont il héritera, et combien de personnes se partageront la licence qui le finance.</p>
+  </div>
+
+  <footer>Synthèse pédagogique — Windows 365 (Cloud PC), préparation MD-102 · complète les fiches « Enrôlement des appareils Intune » et « Windows Autopilot »</footer>
+
+</div>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>

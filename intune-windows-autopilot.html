@@ -1,0 +1,578 @@
+<title>Windows Autopilot</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#EEF1F4;
+    --surface:#FFFFFF;
+    --panel:#E4E9EF;
+    --ink:#16202C;
+    --ink-soft:#4B5A6B;
+    --line:#C9D2DB;
+    --accent:#2458C4;
+    --accent-soft:#E1E9FA;
+    --good:#2E7D4F;
+    --good-soft:#DFF0E4;
+    --warn:#A85A17;
+    --warn-soft:#F5E5D2;
+    --shadow: 0 1px 2px rgba(20,30,45,.06), 0 8px 24px -12px rgba(20,30,45,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0F151C; --surface:#161E27; --panel:#1B2530;
+      --ink:#E7ECF1; --ink-soft:#9FB0C0; --line:#2A3946;
+      --accent:#7FA8F5; --accent-soft:#1C2A44;
+      --good:#7FCB9A; --good-soft:#1A2E22;
+      --warn:#E3A365; --warn-soft:#2E2416;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0F151C; --surface:#161E27; --panel:#1B2530;
+    --ink:#E7ECF1; --ink-soft:#9FB0C0; --line:#2A3946;
+    --accent:#7FA8F5; --accent-soft:#1C2A44;
+    --good:#7FCB9A; --good-soft:#1A2E22;
+    --warn:#E3A365; --warn-soft:#2E2416;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size:17.5px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); color:var(--ink); }
+  .wrap{ max-width:800px; margin:0 auto; padding:64px 24px 120px; }
+
+  .backlink{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size:12px; color:var(--ink-soft); text-decoration:none;
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:22px;
+  }
+  .backlink:hover{ color:var(--accent); }
+
+  .eyebrow{
+    font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:12px; font-weight:600;
+    letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background:var(--accent); display:inline-block; }
+
+  h1{
+    font-family:"Archivo","Segoe UI",sans-serif; font-weight:800;
+    font-size:clamp(30px,5vw,44px); line-height:1.08; letter-spacing:-.01em;
+    margin:14px 0 16px; text-wrap:balance;
+  }
+  .dek{ font-size:19px; color:var(--ink-soft); max-width:62ch; margin:0 0 8px; text-wrap:balance; }
+  .intro{ margin-top:28px; padding-top:28px; border-top:1px solid var(--line); }
+
+  h2{
+    font-family:"Archivo","Segoe UI",sans-serif; font-weight:800; font-size:26px;
+    letter-spacing:-.005em; margin:64px 0 6px; text-wrap:balance;
+    display:flex; align-items:baseline; gap:12px;
+  }
+  h2 .num{
+    font-family:"IBM Plex Mono",monospace; font-size:14px; font-weight:600; color:var(--accent);
+    background:var(--accent-soft); border-radius:5px; padding:3px 8px;
+  }
+  h3{ font-family:"Archivo","Segoe UI",sans-serif; font-weight:700; font-size:18.5px; margin:34px 0 8px; letter-spacing:-.003em; }
+  p{ margin:0 0 16px; max-width:66ch; }
+  ul,ol{ margin:0 0 16px; padding-left:1.3em; max-width:64ch; }
+  li{ margin:0 0 8px; }
+  strong{ font-weight:600; color:var(--ink); }
+  code{ font-family:"IBM Plex Mono",monospace; font-size:.86em; background:var(--panel); padding:.1em .38em; border-radius:4px; color:var(--ink); }
+  a{ color:var(--accent); }
+  .lede{ font-size:19px; color:var(--ink-soft); }
+
+  .panel{
+    position:relative; background:var(--surface); border:1px solid var(--line);
+    border-radius:10px; padding:26px 28px; margin:20px 0 28px; box-shadow:var(--shadow);
+    border-left:3px solid var(--accent);
+  }
+  .panel::before, .panel::after{ content:""; position:absolute; width:10px; height:10px; border-color:var(--line); border-style:solid; }
+  .panel::before{ top:-1px; left:-1px; border-width:2px 0 0 2px; border-radius:3px 0 0 0; }
+  .panel::after{ bottom:-1px; right:-1px; border-width:0 2px 2px 0; border-radius:0 0 3px 0; }
+
+  .callout{
+    background:var(--accent-soft); border:1px solid var(--line); border-radius:10px;
+    padding:18px 22px; margin:22px 0; font-size:16px;
+  }
+  .callout.warn{ background:var(--warn-soft); }
+  .callout .lbl{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--accent); display:block; margin-bottom:6px;
+  }
+  .callout.warn .lbl{ color:var(--warn); }
+  .callout p:last-child{ margin-bottom:0; }
+
+  .table-wrap{ overflow-x:auto; margin:20px 0 28px; border:1px solid var(--line); border-radius:10px; }
+  table{ border-collapse:collapse; width:100%; min-width:520px; font-size:15px; }
+  thead th{
+    font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--ink-soft); text-align:left; padding:12px 16px;
+    background:var(--panel); border-bottom:1px solid var(--line); white-space:nowrap;
+  }
+  tbody th{ text-align:left; font-family:"Archivo",sans-serif; font-weight:700; font-size:14px; padding:12px 16px; color:var(--ink); white-space:nowrap; background:var(--surface); }
+  tbody td{ padding:12px 16px; border-top:1px solid var(--line); vertical-align:top; background:var(--surface); color:var(--ink-soft); font-size:14.5px; line-height:1.5; }
+  tbody tr:first-child td{ border-top:none; }
+  td.yes{ color:var(--good); font-weight:600; }
+  td.no{ color:var(--warn); font-weight:600; }
+
+  figure{ margin:26px 0 30px; }
+  .fig-frame{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px 16px 10px; overflow-x:auto; }
+  figcaption{ font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-soft); margin-top:10px; text-align:center; }
+  svg text{ font-family:"IBM Plex Mono",monospace; }
+  .svg-ink{ color:var(--ink); }
+  .svg-soft{ color:var(--ink-soft); }
+  .svg-line{ color:var(--line); }
+
+  hr.sep{ border:none; border-top:1px solid var(--line); margin:56px 0; }
+
+  .memo{ display:grid; grid-template-columns:1fr; gap:12px; margin:20px 0 30px; }
+  @media (min-width:640px){ .memo{ grid-template-columns:1fr 1fr; } }
+  .memo .cell{ border:1px solid var(--line); border-radius:10px; padding:16px 18px; background:var(--surface); }
+  .memo .cell h4{ margin:0 0 8px; font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--accent); }
+  .memo .cell p{ margin:0; font-size:14.5px; color:var(--ink-soft); }
+
+  footer{ margin-top:70px; padding-top:24px; border-top:1px solid var(--line); font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-soft); }
+  ::-webkit-scrollbar{ height:8px; }
+</style>
+
+<div class="wrap">
+
+  <a class="backlink" href="https://claude.ai/code/artifact/ca2cc3af-e523-419b-bfba-1346e33256b4">← Enrôlement des appareils Intune (fiche générale)</a>
+
+  <div class="eyebrow">MD-102 · Provisionnement des appareils Windows</div>
+  <h1>Windows Autopilot — enregistrer un poste avant même de le déballer</h1>
+  <p class="dek">Le mécanisme qui transforme un PC neuf, encore chez le fabricant, en poste déjà configuré à sa sortie du carton. Il repose en réalité sur deux systèmes qui ne partagent ni base de données, ni logique d'identification.</p>
+
+  <div class="intro">
+    <p class="lede">Autopilot est l'implémentation Windows de la brique ③ du tronc commun vu dans la fiche générale — le « profil de mise en service » — l'équivalent Windows d'Apple Business Manager ou d'Android Zero Touch. La différence tenait en une phrase : pas de second tenant à créer. C'est vrai, mais incomplet — Autopilot cache tout de même sa propre base de données, séparée de celle d'Entra ID et de celle d'Intune. On commence par éclaircir ce point avant d'entrer dans le détail.</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">01</span> Deux générations qui ne se parlent pas</h2>
+
+  <p>Windows Autopilot existe en deux versions qui ne sont <strong>pas</strong> une v1 et une v2 du même produit : ce sont deux approches différentes, avec deux bases de données séparées et deux logiques d'identification de la machine.</p>
+
+  <p>La version historique — le <strong>provisionnement</strong> — identifie chaque machine par un <strong>hash matériel</strong> : un identifiant calculé à partir du fabricant, du modèle, du numéro de série, du numéro de série du disque… et de la date de génération. Problème concret : remplacer une carte mère change suffisamment de composants pour invalider le hash — l'appareil « disparaît » aux yeux d'Autopilot et doit être ré-enregistré. C'est exactement pour corriger ce défaut de conception que Microsoft a construit la seconde version.</p>
+
+  <p>La <strong>préparation de périphérique</strong> (Device Preparation) identifie la machine simplement par son <strong>numéro de série + fabricant + modèle</strong> — un triplet stable, qui survit à un remplacement de disque ou de carte mère. En échange de cette simplicité, elle perd des capacités que la version historique offrait depuis des années.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Provisionnement (historique)</th><th>Device Preparation (nouveau)</th></tr></thead>
+      <tbody>
+        <tr><th>Identifiant</th><td>Hash matériel (change si le matériel change)</td><td>N° de série + fabricant + modèle (stable)</td></tr>
+        <tr><th>Modes de déploiement</th><td>Conduit par l'utilisateur, automatique (self-deploying), préconfiguré (whiteglove)</td><td>Conduit par l'utilisateur uniquement (+ Frontline partagé)</td></tr>
+        <tr><th>Jointure</th><td>Entra Joined ou Entra Hybrid Joined</td><td>Entra Joined uniquement</td></tr>
+        <tr><th>DFCI (verrouillage UEFI)</th><td class="yes">Supporté</td><td class="no">Non supporté</td></tr>
+        <tr><th>Masquage de pages OOBE</th><td class="yes">Oui (EULA, confidentialité…)</td><td class="no">Non</td></tr>
+        <tr><th>Mélange d'apps Win32 + métier</th><td class="no">Interdit (conflit TrustedInstaller)</td><td class="yes">Autorisé</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="lbl">Règle de priorité</span>
+    <p>Le mode <strong>provisionnement historique est toujours prioritaire</strong>. Une machine déjà référencée dans sa base de données ne peut jamais basculer vers Device Preparation — il faut d'abord retirer son enregistrement historique. Un appareil neuf non enregistré, en revanche, peut aller vers l'un ou l'autre selon vos restrictions.</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">02</span> Trois façons d'enregistrer un appareil — et ce qu'elles révèlent</h2>
+
+  <p>On retrouve ici exactement le même schéma qu'avec ABM ou Zero Touch dans la fiche générale : un chemin manuel (toujours disponible, quelle que soit la taille de l'organisation), un chemin automatique pour le parc déjà géré, et un chemin délégué à un tiers pour l'achat en volume.</p>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 880 260" role="img" aria-label="Trois chemins d'enregistrement dans le service Windows Autopilot : collecte manuelle du hash puis import CSV, conversion automatique d'un appareil déjà géré par Intune, et enregistrement par un fabricant ou un revendeur partenaire via un identifiant PKID.">
+        <defs>
+          <marker id="arrowW" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+
+        <!-- lane 1 : manuel -->
+        <g font-size="12">
+          <text x="10" y="35" class="svg-ink" font-weight="700">Manuel</text>
+          <text x="10" y="49" class="svg-soft" font-size="10">(PowerShell, ConfigMgr…)</text>
+          <rect x="150" y="18" width="140" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="220" y="39" text-anchor="middle" fill="var(--accent)">collecte du hash</text>
+          <rect x="360" y="18" width="140" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="430" y="39" text-anchor="middle" fill="var(--accent)">import CSV (≤500)</text>
+          <rect x="700" y="18" width="150" height="34" rx="6" fill="var(--panel)" stroke="currentColor" class="svg-ink" stroke-width="1.3"/>
+          <text x="775" y="39" text-anchor="middle" class="svg-ink">service Autopilot</text>
+          <g stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrowW)">
+            <line x1="292" y1="35" x2="358" y2="35"/>
+            <line x1="502" y1="35" x2="698" y2="35"/>
+          </g>
+        </g>
+
+        <!-- lane 2 : auto -->
+        <g font-size="12">
+          <text x="10" y="115" class="svg-ink" font-weight="700">Automatique</text>
+          <text x="10" y="129" class="svg-soft" font-size="10">(déjà géré par Intune)</text>
+          <rect x="150" y="98" width="350" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="325" y="119" text-anchor="middle" fill="var(--accent)">profil « Convert all targeted devices to Autopilot »</text>
+          <rect x="700" y="98" width="150" height="34" rx="6" fill="var(--panel)" stroke="currentColor" class="svg-ink" stroke-width="1.3"/>
+          <text x="775" y="119" text-anchor="middle" class="svg-ink">service Autopilot</text>
+          <g stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrowW)">
+            <line x1="502" y1="115" x2="698" y2="115"/>
+          </g>
+        </g>
+
+        <!-- lane 3 : OEM/partenaire -->
+        <g font-size="12">
+          <text x="10" y="195" class="svg-ink" font-weight="700">OEM / revendeur</text>
+          <text x="10" y="209" class="svg-soft" font-size="10">(à l'achat en volume)</text>
+          <rect x="150" y="178" width="140" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="220" y="199" text-anchor="middle" fill="var(--accent)">identifiant PKID</text>
+          <rect x="360" y="178" width="140" height="34" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.3"/>
+          <text x="430" y="199" text-anchor="middle" fill="var(--accent)">Partner Center</text>
+          <rect x="700" y="178" width="150" height="34" rx="6" fill="var(--panel)" stroke="currentColor" class="svg-ink" stroke-width="1.3"/>
+          <text x="775" y="199" text-anchor="middle" class="svg-ink">service Autopilot</text>
+          <g stroke="var(--accent)" stroke-width="1.4" marker-end="url(#arrowW)">
+            <line x1="292" y1="195" x2="358" y2="195"/>
+            <line x1="502" y1="195" x2="698" y2="195"/>
+          </g>
+        </g>
+
+        <text x="440" y="245" text-anchor="middle" class="svg-soft" font-size="11.5">Les trois chemins écrivent dans la même base Autopilot — jamais directement dans votre tenant Entra ID ou Intune.</text>
+      </svg>
+    </div>
+    <figcaption>Fig. 1 — Trois chemins, une seule base de données Autopilot, aucun n'écrit directement dans le tenant.</figcaption>
+  </figure>
+
+  <p>Le troisième chemin mérite une lecture attentive parce qu'il ressemble à s'y méprendre au schéma ABM/Zero Touch, avec une différence de taille. Un OEM ou un revendeur (CSP) enregistre vos appareils en utilisant un identifiant <strong>PKID</strong> que le fabricant leur communique — mais il écrit dans la base de données du <strong>service Autopilot</strong>, pas dans votre tenant. Aucune autorisation n'est requise sur votre tenant pour que ça fonctionne ; seule une relation de confiance approuvée compte (<em>Settings → Partner Relationships</em> dans le centre d'administration Microsoft 365). Pas de compte à créer chez un tiers, pas de DUNS à faire vérifier, pas de jeton annuel : c'est ce qui reste vrai dans la comparaison avec Apple/Google.</p>
+
+  <div class="callout">
+    <span class="lbl">La nuance à corriger</span>
+    <p>Dire « Windows n'a qu'un seul tenant » reste vrai au sens où aucun second <em>compte fabricant</em> n'est nécessaire. Mais un même appareil existe en réalité dans <strong>trois registres distincts</strong> qui ne se confondent jamais : l'objet <em>appareil</em> dans Microsoft Entra ID, l'enregistrement <em>managed device</em> dans Microsoft Intune, et l'enregistrement de <em>déploiement</em> dans le service Windows Autopilot. Les trois portent sur la même machine physique, mais aucun outil ne les fusionne visuellement — c'est pour ça qu'on les retrouve dans trois écrans différents du portail.</p>
+  </div>
+
+  <p>Deux règles de bon sens en découlent. D'abord, <strong>un hash ne peut être référencé que dans un seul tenant à la fois</strong> — retenter l'import d'un appareil déjà connu ailleurs renvoie l'erreur <code>ZtdDeviceAssignedToAnotherTenant</code>, résolue soit en contactant l'ancien propriétaire, soit via un ticket au support Microsoft accompagné d'une preuve d'achat. Ensuite, <strong>céder ou détruire une machine sans retirer ses trois enregistrements</strong> (Entra ID, Intune, Autopilot) bloque son prochain propriétaire — un réflexe de fin de vie à intégrer au même titre que le formatage.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">03</span> Configurer le provisionnement historique : profil de déploiement + ESP</h2>
+
+  <p>Une fois l'appareil connu du service Autopilot, deux profils pilotent son comportement : le <strong>profil de déploiement</strong> définit l'expérience d'accueil (OOBE), et la <strong>page d'état d'enregistrement</strong> (ESP) définit ce qui doit être installé avant que l'utilisateur ait le droit de toucher au poste.</p>
+
+  <h3>Le profil de déploiement : trois modes pour trois contextes</h3>
+  <ul>
+    <li><strong>Conduit par l'utilisateur (user-driven)</strong> — le cas standard : l'utilisateur s'authentifie lui-même pendant l'accueil, l'appareil est rattaché à lui.</li>
+    <li><strong>Automatique (self-deploying)</strong> — aucune authentification utilisateur : la confiance repose entièrement sur l'<strong>attestation TPM 2.0</strong> de la machine. Réservé aux postes sans utilisateur nominatif (Kiosk, salle de réunion).</li>
+    <li><strong>Préconfiguré (whiteglove / pre-provisioned)</strong> — un technicien effectue la partie longue (installation des applications) en amont ; l'utilisateur final ne voit que la phase courte liée à son compte à l'ouverture du carton.</li>
+  </ul>
+
+  <h3>La page d'état d'enregistrement (ESP) : trois phases, trois publics</h3>
+  <p>L'ESP bloque volontairement l'accès au bureau tant que les éléments requis ne sont pas installés — c'est un choix : sans elle, l'utilisateur pourrait se retrouver devant un poste « fonctionnel en apparence » mais encore dépourvu de ses stratégies de sécurité.</p>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 900 210" role="img" aria-label="Les trois phases de la page d'état d'enregistrement : préparation de l'appareil (attestation TPM et jointure), configuration de l'appareil (stratégies, certificats, réseau, applications en contexte machine), puis configuration du compte (mêmes éléments en contexte utilisateur).">
+        <defs>
+          <marker id="arrowE" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <g font-size="12.5">
+          <rect x="10" y="30" width="260" height="130" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="1.6"/>
+          <text x="140" y="55" text-anchor="middle" font-weight="700" fill="var(--accent)">① Device preparation</text>
+          <text x="140" y="76" text-anchor="middle" class="svg-soft" font-size="10.5">attestation TPM (self-deploying)</text>
+          <text x="140" y="92" text-anchor="middle" class="svg-soft" font-size="10.5">jointure Entra ID</text>
+          <text x="140" y="108" text-anchor="middle" class="svg-soft" font-size="10.5">enregistrement Intune</text>
+          <text x="140" y="124" text-anchor="middle" class="svg-soft" font-size="10.5">calcul du nb de stratégies</text>
+          <text x="140" y="145" text-anchor="middle" class="svg-soft" font-size="9.5">→ ignore Entra Hybrid Join,</text>
+          <text x="140" y="157" text-anchor="middle" class="svg-soft" font-size="9.5">déjà fait avant l'ESP</text>
+
+          <rect x="320" y="30" width="260" height="130" rx="8" fill="none" stroke="currentColor" class="svg-ink" stroke-width="1.6"/>
+          <text x="450" y="55" text-anchor="middle" font-weight="700">② Device setup</text>
+          <text x="450" y="76" text-anchor="middle" class="svg-soft" font-size="10.5">contexte MACHINE</text>
+          <text x="450" y="96" text-anchor="middle" font-size="11">Security policies · Certificats</text>
+          <text x="450" y="114" text-anchor="middle" font-size="11">Réseau (Wi-Fi/VPN) · Apps</text>
+          <text x="450" y="140" text-anchor="middle" class="svg-soft" font-size="9.5">installe l'IME en premier</text>
+          <text x="450" y="152" text-anchor="middle" class="svg-soft" font-size="9.5">scripts PS non suivis par l'ESP</text>
+
+          <rect x="630" y="30" width="260" height="130" rx="8" fill="none" stroke="currentColor" class="svg-ink" stroke-width="1.6"/>
+          <text x="760" y="55" text-anchor="middle" font-weight="700">③ Account setup</text>
+          <text x="760" y="76" text-anchor="middle" class="svg-soft" font-size="10.5">contexte UTILISATEUR</text>
+          <text x="760" y="96" text-anchor="middle" font-size="11">mêmes 4 catégories,</text>
+          <text x="760" y="112" text-anchor="middle" font-size="11">ciblées sur la personne</text>
+          <text x="760" y="140" text-anchor="middle" class="svg-soft" font-size="9.5">finalise l'Hybrid Join</text>
+          <text x="760" y="152" text-anchor="middle" class="svg-soft" font-size="9.5">puis Windows Hello</text>
+        </g>
+        <g stroke="currentColor" class="svg-ink" stroke-width="1.6" fill="none" marker-end="url(#arrowE)">
+          <line x1="272" y1="95" x2="318" y2="95"/>
+          <line x1="582" y1="95" x2="628" y2="95"/>
+        </g>
+        <text x="450" y="195" text-anchor="middle" class="svg-soft" font-size="11">Le poste reste bloqué à chaque phase tant que les éléments requis ne sont pas installés.</text>
+      </svg>
+    </div>
+    <figcaption>Fig. 2 — L'ESP suit deux fois les quatre mêmes catégories : une fois pour l'appareil, une fois pour l'utilisateur qui vient de s'authentifier.</figcaption>
+  </figure>
+
+  <div class="callout warn">
+    <span class="lbl">Deux pièges classiques</span>
+    <p>Une application ciblée par l'ESP mais <strong>jamais assignée</strong> depuis le menu Applications d'Intune est l'erreur la plus fréquente — alignez toujours l'assignation des apps sur le même groupe que le profil ESP. Et ne mélangez jamais des applications <strong>Win32</strong> et <strong>métier (LOB)</strong> dans le même déploiement : les deux s'appuient sur <code>TrustedInstaller</code>, qui n'autorise pas deux installations simultanées — l'ESP ne les ordonnance pas entre elles, l'une des deux échoue.</p>
+  </div>
+
+  <p>Deux briques complètent le provisionnement historique : <strong>BitLocker</strong> chiffre automatiquement le disque pendant l'OOBE sur le matériel compatible (Modern Standby + HSTI), et <strong>DFCI</strong> verrouille les paramètres UEFI de façon à ce qu'aucune action locale — même avec le mot de passe UEFI — ne puisse les modifier. DFCI n'est disponible que sur du matériel où l'enregistrement Autopilot vient du fabricant ou d'un revendeur agréé — cohérent avec la logique du chapitre : la confiance profonde (jusqu'au firmware) exige une chaîne de confiance qui commence à l'usine, pas un import CSV fait à la main.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">04</span> Configurer la préparation : plus simple, délibérément plus limité</h2>
+
+  <p>Device Preparation retire une bonne partie de la complexité de configuration, cohérent avec son objectif (numéro de série stable, pas de gestion de hash) : un groupe d'appareils, un groupe d'utilisateurs autorisés, jusqu'à 10 applications et 10 scripts PowerShell exécutés en contexte système. Contrairement au mode historique, <strong>rien n'empêche de mélanger Win32 et métier</strong> ici — un choix d'architecture différent qui évite justement le conflit TrustedInstaller vu plus haut.</p>
+
+  <p>Ce que ce mode ne propose pas encore, à l'écriture de ce chapitre : le verrouillage DFCI, le masquage des pages EULA/confidentialité, ni les modes self-deploying et pre-provisioned — seul le mode conduit par l'utilisateur existe (plus un mode partagé pour Windows 365 Frontline).</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">05</span> Le déroulé complet, du démarrage à la session ouverte</h2>
+
+  <p>Le scénario le plus courant — conduit par l'utilisateur, jointure Entra ID directe — enchaîne les briques vues plus haut dans un ordre précis.</p>
+
+  <figure>
+    <div class="fig-frame">
+      <svg viewBox="0 0 940 150" role="img" aria-label="Séquence de provisionnement : démarrage de l'appareil, contact du service Autopilot, authentification de l'utilisateur, jointure Entra ID et inscription Intune, puis les trois phases de l'ESP, jusqu'à l'ouverture de session.">
+        <defs>
+          <marker id="arrowS" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+          </marker>
+        </defs>
+        <line x1="50" y1="75" x2="890" y2="75" stroke="currentColor" class="svg-line" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <g font-size="10.8" class="svg-ink" text-anchor="middle">
+          <circle cx="50" cy="75" r="5" fill="var(--accent)"/>
+          <text x="50" y="102">Démarrage</text>
+          <circle cx="200" cy="75" r="5" fill="var(--accent)"/>
+          <text x="200" y="102">Contact service</text>
+          <text x="200" y="115" class="svg-soft" font-size="9.5">Autopilot</text>
+          <circle cx="350" cy="75" r="5" fill="var(--accent)"/>
+          <text x="350" y="102">Authentification</text>
+          <text x="350" y="115" class="svg-soft" font-size="9.5">utilisateur</text>
+          <circle cx="500" cy="75" r="5" fill="var(--accent)"/>
+          <text x="500" y="102">Jointure Entra +</text>
+          <text x="500" y="115" class="svg-soft" font-size="9.5">inscription Intune</text>
+          <circle cx="650" cy="75" r="5" fill="var(--accent)"/>
+          <text x="650" y="102">ESP ① + ②</text>
+          <text x="650" y="115" class="svg-soft" font-size="9.5">machine</text>
+          <circle cx="800" cy="75" r="5" fill="var(--accent)"/>
+          <text x="800" y="102">ESP ③</text>
+          <text x="800" y="115" class="svg-soft" font-size="9.5">utilisateur</text>
+          <circle cx="890" cy="75" r="5" fill="var(--good)"/>
+          <text x="890" y="50" fill="var(--good)" font-weight="700">Session ouverte</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption>Fig. 3 — Chaque point bloque le suivant : impossible d'atteindre le bureau sans avoir traversé les six étapes.</figcaption>
+  </figure>
+
+  <p>Deux variations méritent d'être notées. En <strong>self-deploying</strong>, l'étape « authentification » est remplacée par l'attestation TPM — personne ne se connecte. En <strong>Entra Hybrid Join</strong>, la jointure au domaine se fait <em>avant</em> l'ESP via le connecteur Intune pour Active Directory (une mécanique reprenant l'Offline Domain Join hérité de Windows 7), et l'utilisateur peut avoir à s'authentifier deux fois : une pour Entra ID, une seconde pour le domaine Active Directory une fois la jointure hybride terminée.</p>
+
+  <!-- ============================================================ -->
+  <h2><span class="num">06</span> Remettre un appareil en circulation : trois niveaux, trois usages</h2>
+
+  <p>Les trois mécanismes de réinitialisation ne sont pas des variantes de sévérité croissante par hasard — chacun répond à un scénario métier précis : changer d'utilisateur, remettre le poste à neuf, ou l'effacer avant mise au rebut.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>Conserve la jointure ?</th><th>Conserve les données utilisateur ?</th><th>Usage typique</th></tr></thead>
+      <tbody>
+        <tr><th>Autopilot Reset</th><td class="yes">Oui</td><td class="no">Non — profil retiré</td><td>Réattribuer le poste à un nouvel utilisateur, sans repasser par l'OOBE</td></tr>
+        <tr><th>Fresh Start</th><td class="yes">Oui</td><td>Optionnel (case à cocher)</td><td>Repartir sur un Windows propre, sans les apps préinstallées par le fabricant, en gardant si besoin les fichiers</td></tr>
+        <tr><th>Wipe</th><td>Optionnel (case à cocher)</td><td>Optionnel (même case)</td><td>Effacement complet avant mise au rebut ou revente</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>Un quatrième outil, <strong>Intune Recovery</strong>, répond à un problème différent — non pas « changer d'utilisateur » mais « le système ne démarre plus ». Il construit une clé USB amorçable pour réinstaller Windows sur une machine corrompue, puis laisse Autopilot reprendre la main pour ré-enrôler l'appareil — un peu comme le déploiement de système d'exploitation de Configuration Manager, mais piloté depuis Intune.</p>
+
+  <hr class="sep">
+
+  <!-- ============================================================ -->
+  <h2><span class="num">07</span> Mémo de synthèse</h2>
+
+  <div class="memo">
+    <div class="cell">
+      <h4>Les deux mondes</h4>
+      <p>Provisionnement = hash matériel, riche en options, prioritaire. Device Preparation = numéro de série, simple, limité. Jamais les deux en même temps sur un appareil.</p>
+    </div>
+    <div class="cell">
+      <h4>Trois registres, un appareil</h4>
+      <p>Entra ID (identité), Intune (gestion), Autopilot (déploiement) : trois vues distinctes du même poste, jamais fusionnées à l'écran.</p>
+    </div>
+    <div class="cell">
+      <h4>L'ESP en un schéma mental</h4>
+      <p>Deux fois les quatre mêmes catégories (policies, certs, réseau, apps) : une passe machine, une passe utilisateur.</p>
+    </div>
+    <div class="cell">
+      <h4>Le bon outil de reset</h4>
+      <p>Changer d'utilisateur → Autopilot Reset. Nettoyer → Fresh Start. Mettre au rebut → Wipe. Système en panne → Intune Recovery.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="lbl">À retenir avant tout le reste</span>
+    <p>Autopilot ne fait rien d'autre que remplir la brique ③ du tronc commun (« profil de mise en service ») pour Windows — exactement comme ABM et Zero Touch le font pour Apple et Android. Ce qui change n'est jamais le rôle, seulement le prix à payer pour y accéder : ici, pas de second tenant, mais une base de données interne dont il faut connaître l'existence pour comprendre pourquoi un appareil peut être « géré » sans être « Autopilot », ou l'inverse.</p>
+  </div>
+
+  <footer>Synthèse pédagogique — Windows Autopilot, préparation MD-102 · complète la fiche « Enrôlement des appareils Intune »</footer>
+
+</div>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function splitText(text){
+    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+    var chunks = [];
+    lines.forEach(function(line){
+      if (line.length <= 220) { chunks.push(line); return; }
+      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = splitText(el.innerText || el.textContent || '');
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>
