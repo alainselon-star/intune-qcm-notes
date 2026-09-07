@@ -295,7 +295,7 @@
 
   <h2><span class="num">✓</span>Nettoyage</h2>
   <p>Avant de refermer le labo, supprimez les objets créés — sinon ils polluent le tenant pour les prochaines sessions.</p>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Avant de refermer le labo, supprimez tous les objets créés, l'utilisateur test point helpdesk1, les groupes SG-Helpdesk-Paris et SG-Devices-Paris, le rôle personnalisé Helpdesk-Paris-Limite, la balise Paris, l'unité d'administration AU-Paris, et si vous l'avez créée, la politique d'approbation multi-admin. L'assignment de rôle se supprime automatiquement avec le rôle personnalisé.">
   <table>
     <thead><tr><th>Objet</th><th>Emplacement</th></tr></thead>
     <tbody>
@@ -311,7 +311,7 @@
   </div>
 
   <h2><span class="num">📋</span>Checklist de validation</h2>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="La checklist de validation reprend les neuf étapes du labo, création des groupes, clonage et comparaison du rôle personnalisé, création et assignation de la balise Paris, vérification de l'assignment complet, exemption de licence, création de l'unité d'administration, test de PIM, observation ou mise en place de l'approbation multi-admin, et enfin le nettoyage.">
   <table>
     <thead><tr><th>#</th><th>Exercice</th><th>Fait ?</th></tr></thead>
     <tbody>
@@ -403,15 +403,73 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .ref, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, h4, p, li, .table-scroll, figure, .warn-box, .goal, .result, footer';
+  var JOIN_CHILDREN = '.lifecycle li';
+  var GLUED_LABEL = '.result, .warn-box';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches(GLUED_LABEL)){
+      clone.querySelectorAll('strong').forEach(function(s){
+        var next = s.nextSibling;
+        if (next && next.nodeType === 3 && next.textContent && !/^\s/.test(next.textContent)){
+          next.textContent = '. ' + next.textContent;
+        }
+      });
+      return normalizeSpeech(clone.textContent);
+    }
+    if (el.matches(JOIN_CHILDREN)){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -459,7 +517,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;
