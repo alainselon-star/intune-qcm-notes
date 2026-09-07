@@ -274,7 +274,7 @@
   <p>On distingue les rôles définis par Microsoft Entra ID (portée large, transverse à tout le tenant) des rôles définis dans Microsoft Intune (portée fine, basée sur plus de 50 « classes » d'objets).</p>
 
   <h3>Rôles Microsoft Entra ID relatifs à Intune</h3>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Voici les principaux rôles Microsoft Entra ID liés à Intune. Global Administrator, fort privilège, a un accès complet en modification sur l'ensemble des produits et services du tenant. Global Reader a le même périmètre, mais en lecture seule. Security Administrator a un accès en modification à l'ensemble des produits de sécurité, Defender, Identity Protection, Intune. Security Operator et Security Reader ont ce même périmètre sécurité, en lecture seule. Intune Administrator, fort privilège, a des permissions globales sur le service Intune et tous ses objets, stratégies, profils, applications, appareils. Windows 365 Administrator provisionne et gère tous les aspects des Cloud PC. Windows Update Deployment Administrator gère les déploiements Windows Update via le service de déploiement de Windows Update for Business. Edge Administrator administre le service Edge dans le centre d'administration Microsoft 365. Office Apps Administrator administre le Microsoft Cloud Policy Service, les stratégies Microsoft 365 Apps, les rapports d'usage et les mises à jour client. Printer Administrator gère toutes les configurations d'imprimantes via Universal Print. Printer Technician enregistre des imprimantes et gère leur état, mais ne peut pas définir les permissions ni le partage.">
   <table>
     <thead>
       <tr><th>Rôle</th><th>Portée</th></tr>
@@ -333,7 +333,7 @@
   </div>
 
   <h3>Rôles Windows 365 et Windows Autopatch</h3>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Pour Windows 365, quatre rôles existent. Cloud PC Administrator gère tous les aspects des Cloud PC, l'image système, les connexions réseau Azure, le provisionnement. Cloud PC Reader a un accès en lecture sur toutes les données du nœud Windows 365. Network Interface Contributor a les autorisations minimales pour créer ou joindre la carte réseau virtuelle dans le groupe de ressources d'une connexion réseau Azure. Network User a les autorisations minimales pour joindre cette carte réseau au réseau virtuel de la connexion réseau Azure. Pour Windows Autopatch, deux rôles existent. Autopatch Administrator gère les groupes, les demandes de support, les messages et les rapports Autopatch, mais pas les stratégies de mise à jour, qui nécessitent le rôle Policy and Profile Manager. Autopatch Reader a un accès en lecture sur toutes les données Windows Autopatch.">
   <table class="compact">
     <thead>
       <tr><th>Service</th><th>Rôle</th><th>Portée</th></tr>
@@ -438,7 +438,7 @@
   </ol>
 
   <h2><span class="num">8.</span>Grille de lecture transverse</h2>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Pour résumer les quatre mécanismes. Le RBAC, rôle plus balise plus groupe, répond à la question, qui peut faire quoi sur quoi, c'est le modèle statique de base. Les unités d'administration répondent à la question, comment découper l'annuaire par équipe ou région, c'est un mécanisme structurel côté Entra ID. PIM répond à la question, le droit est-il actif en permanence ou seulement à la demande, c'est un contrôle temporel, juste à temps. L'approbation multi-admin répond à la question, une seule personne peut-elle exécuter une action critique seule, c'est un contrôle collaboratif à double validation.">
   <table>
     <thead>
       <tr><th>Mécanisme</th><th>Répond à</th><th>Type de contrôle</th></tr>
@@ -528,15 +528,63 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .step, .arrow, .plus, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, h4, p, li, .table-scroll, figure, .focus-box, .warn-box, footer';
+  var JOIN_CHILDREN = '.lifecycle li, .memo .cell, .callout';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches(JOIN_CHILDREN)){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -584,7 +632,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;

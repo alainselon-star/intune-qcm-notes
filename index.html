@@ -93,11 +93,6 @@
       <h2>Gestion des droits et des permissions</h2>
       <p>Fiche de synthèse du chapitre « Gestion des droits et des permissions ».</p>
     </a>
-    <a class="card" href="intune-labo-droits-permissions.html">
-      <span class="num">05L</span>
-      <h2>Labo — Droits et permissions (RBAC)</h2>
-      <p>8 exercices guidés sur un tenant réel : groupes, rôles, balises d'étendue, PIM, MAA.</p>
-    </a>
     <a class="card" href="intune-securite-conformite.html">
       <span class="num">06</span>
       <h2>Sécurité et conformité des appareils</h2>
@@ -187,15 +182,61 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, p, li, .table-wrap, figure, .memo .cell, footer';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches('.memo .cell, .callout')){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -243,7 +284,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;

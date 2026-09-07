@@ -190,7 +190,7 @@
 
   <p>Windows 365 se vend en deux familles, pensées pour deux réalités de poste de travail différentes.</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Windows 365 se vend selon deux familles de licence. La licence Enterprise vise les employés de bureau, elle donne un Cloud PC en accès permanent, avec une seule session à la fois. La licence Frontline Dedicated vise le personnel de terrain travaillant à temps partiel ou en horaires postés, elle donne jusqu'à trois Cloud PC utilisables de façon non simultanée, chacun assigné à un seul utilisateur. La licence Frontline Shared vise aussi le personnel de terrain, pour un usage court sans besoin de conserver les données, elle donne un seul Cloud PC partagé par un groupe d'utilisateurs, toujours en non simultané.">
     <table>
       <thead><tr><th></th><th>Enterprise</th><th>Frontline — Dedicated</th><th>Frontline — Shared</th></tr></thead>
       <tbody>
@@ -266,7 +266,7 @@
 
   <p>Deux sources possibles pour le disque système d'un Cloud PC neuf.</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Deux sources sont possibles pour le disque système d'un Cloud PC neuf. L'image de la galerie est maintenue par Microsoft, mise à jour chaque mois, elle contient déjà les applications Microsoft 365 et Teams préinstallées, avec des optimisations d'appel, et n'impose aucune contrainte particulière. L'image personnalisée, à l'inverse, c'est vous qui la maintenez et qui décidez de son contenu, mais elle doit respecter plusieurs contraintes, une génération 2, généralisée avec Sysprep, en session unique, jamais jointe au préalable à un annuaire, et ne dépassant pas soixante-quatre gigaoctets. Elle provient soit d'un VHD téléversé, soit, c'est la méthode recommandée, de la capture d'une VM Azure.">
     <table>
       <thead><tr><th></th><th>Image de la galerie</th><th>Image personnalisée</th></tr></thead>
       <tbody>
@@ -292,7 +292,7 @@
 
   <p>Windows 365 ne se limite pas à un accès distant classique : trois fonctionnalités rapprochent l'expérience du poste physique traditionnel, chacune avec ses propres prérequis.</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Trois fonctionnalités matérielles rapprochent Windows 365 d'un poste physique classique. Windows 365 Boot fait démarrer directement le PC physique dans son Cloud PC, dès l'allumage, elle demande un Windows 11 récent et surtout, condition particulière, que la machine physique soit enregistrée dans Windows Autopilot et ajoutée à un groupe Entra dédié, réservée au public Frontline. Windows 365 Switch permet de basculer rapidement entre l'environnement local et le Cloud PC, elle demande Windows 11 des deux côtés et l'application Windows installée, pour tout utilisateur disposant d'un poste physique. Windows 365 Link, enfin, s'appuie sur un boîtier dédié conçu par Microsoft comme client léger, elle demande le SSO Windows 365 activé, pour des postes dédiés uniquement au Cloud PC.">
     <table>
       <thead><tr><th></th><th>Windows 365 Boot</th><th>Windows 365 Switch</th><th>Windows 365 Link</th></tr></thead>
       <tbody>
@@ -409,15 +409,61 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, p, li, .table-wrap, figure, .memo .cell, footer';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches('.memo .cell, .callout')){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -465,7 +511,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;

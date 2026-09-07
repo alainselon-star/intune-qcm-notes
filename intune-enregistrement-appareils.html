@@ -420,7 +420,7 @@
 
   <p>Le tableau suivant montre comment chaque plateforme remplit ces trois cases. Gardez-le sous les yeux : chaque section « cas particulier » plus bas n'est qu'un développement d'une de ces lignes.</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Voici comment chaque plateforme remplit les trois briques du tronc commun. Pour l'identité, Windows utilise la jointure Microsoft Entra ID, native, puisque l'OS et l'identité appartiennent au même éditeur ; Apple utilise un certificat Apple Push MDM et un compte Apple géré, éventuellement fédéré à Entra ID ; Android utilise un compte Managed Google Play lié au tenant ; Linux utilise simplement un compte Entra ID saisi dans l'application Intune. Pour le canal permanent, Windows utilise son agent MDM natif ; Apple utilise un profil MDM et le service APNs ; Android utilise l'agent DPC et Firebase Cloud Messaging ; Linux utilise l'application Intune elle-même, sans vrai push, plus proche d'un client classique. Pour le profil de mise en service, Windows utilise Autopilot ou la jointure manuelle ; Apple utilise un profil d'enregistrement via Apple Business Manager ; Android utilise un profil d'enregistrement via Zero Touch ou Samsung KME ; Linux n'a aucune notion de mise en service pilotée.">
     <table>
       <thead>
         <tr><th>Brique</th><th>Windows</th><th>Apple</th><th>Android</th><th>Linux</th></tr>
@@ -486,7 +486,7 @@
 
   <p>Un appareil mobile ne peut pas garder une connexion permanente ouverte vers Intune — ce serait beaucoup trop coûteux en batterie. Chaque OS garde donc <strong>une seule</strong> connexion longue durée, économe en énergie, en permanence ouverte — mais elle ne va pas vers Intune : elle va vers le service de notification que <em>le fabricant de l'OS</em> possède et fait tourner. C'est ce service qu'on appelle le canal natif :</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Chaque fabricant d'OS possède son propre service de notification push. Pour iOS, iPadOS et macOS, c'est APNs, le service de notification push d'Apple, dont le propriétaire est Apple. Pour Android, c'est FCM, Firebase Cloud Messaging, via GMS, dont le propriétaire est Google. Pour Windows, c'est WNS, le Windows Notification Service, dont le propriétaire est Microsoft.">
     <table>
       <thead><tr><th>OS</th><th>Service de push natif</th><th>Propriétaire</th></tr></thead>
       <tbody>
@@ -548,7 +548,7 @@
 
   <p>ABM, Zero Touch, APNs, FCM : quatre sigles qui donnent l'impression de décrire la même chose, alors qu'ils se situent à deux niveaux complètement différents de l'architecture — et surtout, à deux <strong>moments</strong> différents.</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="ABM ou Zero Touch, et APNs ou FCM, se situent à deux niveaux différents. ABM et Zero Touch sont un portail administratif de rattachement en masse ; ils répondent à la question, à quelle organisation appartient cet appareil et vers quel MDM le rediriger ; ils ne servent qu'une seule fois, à l'achat puis au tout premier démarrage ; l'analogie, c'est l'acte de propriété. APNs et FCM sont un service réseau de notification push ; ils répondent à la question, comment réveiller cet appareil précis, là, maintenant ; ils servent en continu, pendant toute la durée de gestion ; l'analogie, c'est la ligne téléphonique.">
     <table>
       <thead><tr><th></th><th>ABM / Zero Touch</th><th>APNs / FCM</th></tr></thead>
       <tbody>
@@ -736,7 +736,7 @@
     <p style="margin-top:14px">Contrairement à Apple qui distingue surtout <em>avec/sans affinité</em>, Google structure ses modes autour d'un axe explicite : <strong>à qui appartient l'appareil, et à quel usage est-il destiné ?</strong> D'où un catalogue plus large — cinq modes actifs — que chez les autres OS.</p>
   </div>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Android Enterprise propose cinq modes. Work Profile est un mode personnel, BYOD, avec un profil perso conservé, c'est même le principe ; cas d'usage typique, un téléphone personnel avec un conteneur professionnel isolé. Fully Managed, ou COBO, est un mode entreprise, sans profil personnel ; cas d'usage typique, un téléphone métier standard avec un contrôle total. COPE est un mode entreprise qui conserve un profil personnel ; cas d'usage typique, un téléphone fourni par l'entreprise qui tolère un usage personnel encadré. Dedicated, ou COSU, est un mode entreprise sans utilisateur ; cas d'usage typique, une borne, un point de vente, un appareil partagé. AOSP est un mode entreprise sans profil personnel ; cas d'usage typique, des appareils sans services Google, comme des casques de réalité virtuelle ou augmentée.">
     <table>
       <thead><tr><th>Mode Android Enterprise</th><th>Propriété</th><th>Profil perso ?</th><th>Cas d'usage typique</th></tr></thead>
       <tbody>
@@ -754,7 +754,7 @@
   <h3>Zero Touch et Samsung Knox : deux chemins concurrents, pas complémentaires</h3>
   <p>Pour une même flotte Samsung, on choisit <strong>l'un ou l'autre</strong> — ce ne sont pas deux couches empilées. <strong>Android Zero Touch</strong> est le programme générique de Google (l'équivalent d'ABM chez Apple) : il fonctionne sur n'importe quelle marque Android participante, pratique si le parc mélange plusieurs constructeurs. <strong>Samsung Knox Mobile Enrollment (KME)</strong> est antérieur — Samsung a construit son propre programme avant que Google ne propose un équivalent générique, en s'appuyant sur sa puce de sécurité matérielle Knox — et reste Samsung uniquement.</p>
 
-  <div class="table-wrap">
+  <div class="table-wrap" data-speech="Zero Touch et Samsung KME sont deux chemins concurrents. Zero Touch couvre n'importe quelle marque Android participante ; il utilise un compte Google Zero Touch ; en compatibilité historique, il ne cible qu'Android Enterprise ; il n'a pas d'option propriétaire particulière. Samsung KME ne couvre que les appareils Samsung ; il utilise un compte Samsung Knox, indépendant de Google ; en compatibilité historique, il peut aussi cibler l'ancien mode Device Administrator, jusqu'à Android 10 ; il propose des options propriétaires, le double chiffrement matériel Dual DAR, une désactivation fine des applications système, et un QR code préconfiguré pour le Wi-Fi.">
     <table>
       <thead><tr><th></th><th>Zero Touch</th><th>Samsung KME</th></tr></thead>
       <tbody>
@@ -797,19 +797,19 @@
   <p>Pour retenir le chapitre en un coup d'œil avant l'examen : ce qu'il faut savoir instancier <em>en premier</em>, et le mot-clé qui trahit chaque plateforme.</p>
 
   <div class="memo">
-    <div class="cell">
+    <div class="cell" data-speech="Windows. Premier prérequis, la jointure Entra ID activée et un enregistrement CNAME DNS. Mots-clés, Hybrid Join, co-gestion, MDE-Attach. Piège à éviter, Workgroup n'est pas Entra Registered, qui n'est pas non plus Entra Joined.">
       <h4><span class="tag win">Windows</span></h4>
       <p><strong>Prérequis n°1 :</strong> jointure Entra ID activée + CNAME DNS.<br><strong>Mot-clé :</strong> Hybrid Join, co-gestion, MDE-Attach.<br><strong>Piège :</strong> Workgroup ≠ Entra Registered ≠ Entra Joined.</p>
     </div>
-    <div class="cell">
+    <div class="cell" data-speech="Apple. Premier prérequis, le certificat APN, renouvelé chaque année, avec un délai de grâce de trente jours. Mots-clés, ABM, DUNS, affinité utilisateur. Piège à éviter, le User Enrollment via le portail d'entreprise est déprécié, seule la version account driven compte.">
       <h4><span class="tag apple">Apple</span></h4>
       <p><strong>Prérequis n°1 :</strong> certificat APN, renouvelé chaque année (grâce : 30 jours).<br><strong>Mot-clé :</strong> ABM, DUNS, affinité utilisateur.<br><strong>Piège :</strong> User Enrollment portail d'entreprise = déprécié, seule la version <em>account driven</em> compte.</p>
     </div>
-    <div class="cell">
+    <div class="cell" data-speech="Android. Premier prérequis, un compte Managed Google Play. Mots-clés, COBO, COPE, COSU, Zero Touch contre Knox. Piège à éviter, Device Administrator est déprécié depuis janvier 2025 pour les appareils avec services Google.">
       <h4><span class="tag android">Android</span></h4>
       <p><strong>Prérequis n°1 :</strong> compte Managed Google Play.<br><strong>Mot-clé :</strong> COBO / COPE / COSU, Zero Touch vs KNOX.<br><strong>Piège :</strong> Device Administrator est déprécié depuis janvier 2025 pour les appareils GMS.</p>
     </div>
-    <div class="cell">
+    <div class="cell" data-speech="Linux. Premier prérequis, GNOME, Edge, et le paquet Intune Portal. Mots-clés, Ubuntu Desktop, RHEL, rien d'autre. Piège à éviter, pas de BYOD, pas de serveurs, WSL2 non supporté.">
       <h4><span class="tag linux">Linux</span></h4>
       <p><strong>Prérequis n°1 :</strong> GNOME + Edge + paquet Intune Portal.<br><strong>Mot-clé :</strong> Ubuntu Desktop, RHEL — rien d'autre.<br><strong>Piège :</strong> pas de BYOD, pas de serveurs, WSL2 non supporté.</p>
     </div>
@@ -891,15 +891,63 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, p, li, .table-wrap, figure, .memo .cell, footer';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*≠\s*/g, ' différent de ')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches('.memo .cell, .callout')){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -947,7 +995,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;

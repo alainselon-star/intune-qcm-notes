@@ -284,6 +284,7 @@
   </div>
 
   <h2><span class="num">5.</span>Récapitulatif des licences</h2>
+  <div class="table-scroll" data-speech="Les treize fonctionnalités générales relèvent d'Intune Plan 1. Windows Autopilot, non précisé. Windows Autopatch et le service de déploiement de Windows Update for Business, licence Windows Entreprise, une dimension distincte. Endpoint Analytics, non précisé. Advanced Analytics, Intune Suite. Cloud PKI, non précisé. Remote Help, non précisé. Enterprise App Management, non précisé. Microsoft Tunnel, en usage standard, non précisé, mais via MAM sur un périphérique non enregistré, Intune Suite. Endpoint Privilege Management, Intune Suite.">
   <table>
     <thead>
       <tr><th>Fonctionnalité / service</th><th>Palier selon le texte</th></tr>
@@ -302,6 +303,7 @@
       <tr><td>Endpoint Privilege Management (EPM)</td><td><span class="tag tag-suite">Intune Suite</span></td></tr>
     </tbody>
   </table>
+  </div>
   <p class="note">Les cases « Non précisé » signalent que le chapitre ne donne pas l'information — il ne faut pas en déduire un palier par défaut. Pour une réponse certaine sur le positionnement commercial actuel, se référer à la documentation Microsoft à jour.</p>
 
   <footer>
@@ -379,15 +381,63 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, h4, p, li, .table-scroll, figure, .focus-box, footer';
+  var JOIN_CHILDREN = '.lifecycle li, .memo .cell, .callout';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches(JOIN_CHILDREN)){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -435,7 +485,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;

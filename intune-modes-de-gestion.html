@@ -243,7 +243,7 @@
   <h2><span class="num">2.</span>Modes de gestion Windows</h2>
   <p>Windows propose quatre modes MDM — traditionnel, moderne, cogestion, coexistence — plus un mode MAM via Microsoft Edge.</p>
 
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Windows propose quatre modes de gestion MDM. Le mode traditionnel suit un cycle de vie classique, déploiement du système, déploiement d'applications, gestion des mises à jour et de la conformité, le poste est verrouillé sur un standard d'entreprise, sans usage personnel, il s'appuie sur Configuration Manager, Active Directory et les GPO, WSUS et MDT. Le mode moderne, cloud natif, suit un cycle adapté à la mobilité, enregistrement, puis provisionnement des ressources, puis gestion et protection, puis retrait, il s'appuie sur OMA-DM, ou le nouveau WinDC, via Intune. La cogestion sert de pont entre Configuration Manager et Intune pour migrer en douceur, chaque charge de travail pouvant être basculée individuellement, c'est le seul couple qui propose officiellement la cogestion. La coexistence, enfin, c'est quand un MDM tiers, différent d'Intune en cogestion officielle, est détecté par le client ConfigMgr, qui se désactive alors automatiquement sur les fonctions concernées, ne gardant que l'inventaire, le contrôle d'usage logiciel et la gestion d'alimentation.">
   <table>
     <thead>
       <tr><th>Mode</th><th>Principe</th><th>Outils / protocole</th></tr>
@@ -340,7 +340,7 @@
   </div>
 
   <h3>Trois façons d'obtenir le mode Supervised</h3>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Il existe trois façons d'obtenir le mode supervisé. Apple Configurator permet une préparation manuelle, appareil par appareil, via un Mac ou un iPhone récent, il peut aussi servir à enregistrer un appareil dans Apple Business Manager ou Apple School Manager s'il n'a pas été préenregistré par le revendeur, avec une libération possible par l'utilisateur pendant trente jours après l'inscription Intune. Le Direct Enrollment, réservé à macOS, permet une inscription en masse sans accès à ABM ou ASM, ou nécessitant une connexion réseau câblée, il n'associe pas l'appareil à un utilisateur, et reste réservé aux postes partagés ou aux kiosques. L'Automated Device Enrollment, anciennement DEP, est la méthode recommandée, via Apple Business Manager ou Apple School Manager, l'appareil neuf se connecte et se configure automatiquement dès le premier allumage, avec un Setup Assistant personnalisable qui permet de masquer certaines étapes comme Apple ID ou Siri.">
   <table>
     <thead>
       <tr><th>Méthode</th><th>Usage</th></tr>
@@ -391,7 +391,7 @@
     </div>
   </div>
 
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Sur Android, les quatre scénarios se comparent ainsi. Le Work Profile fonctionne dès Android 6, avec un provisionnement possible sorti du carton via Samsung Knox, une inscription possible même après le premier démarrage, une conformité limitée au seul profil professionnel, aucune configuration avancée du téléphone, une protection du périphérique par MDE, et un effacement à distance limité au conteneur professionnel. Les modes Dedicated et Fully Managed, à partir d'Android 8, et COPE, à partir d'Android 11, partagent un profil plus complet, provisionnement sorti du carton par QR code, Zero Touch ou Knox, mais pas d'inscription possible après le premier démarrage, une conformité et un effacement à distance complets, et une configuration avancée du téléphone disponible. Seule différence entre eux, la protection par MDE, disponible pour Fully Managed, absente pour Dedicated et pour COPE.">
   <table class="compact">
     <thead>
       <tr><th>Critère</th><th>Work Profile</th><th>Dedicated</th><th>Fully Managed</th><th>COPE</th></tr>
@@ -414,7 +414,7 @@
 
   <h2><span class="num">5.</span>Grille de lecture transverse</h2>
   <p>Le même dégradé « BYOD léger → conteneur isolé → contrôle total d'entreprise » traverse les trois plateformes :</p>
-  <div class="table-scroll">
+  <div class="table-scroll" data-speech="Le même dégradé traverse les trois plateformes. Au niveau BYOD léger, Windows utilise l'enregistrement manuel dans Intune uniquement, Apple utilise le Device Enrollment, Android utilise le Device Administrator historique. Au niveau conteneur isolé, pour un BYOD confidentiel, Windows n'a pas d'équivalent direct, Apple utilise le User Enrollment, Android utilise Android Enterprise en Work Profile. Au niveau contrôle total, pour un usage corporate, Windows utilise le mode moderne, la cogestion ou le mode traditionnel, Apple utilise le mode Supervised, Android utilise Android Enterprise en Dedicated, Fully Managed ou COPE.">
   <table>
     <thead>
       <tr><th>Niveau de contrôle</th><th>Windows</th><th>Apple</th><th>Android</th></tr>
@@ -503,15 +503,63 @@
   pickVoice();
   if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
 
-  function splitText(text){
-    var lines = text.split(/\n+/).map(function(s){ return s.replace(/\s+/g,' ').trim(); }).filter(Boolean);
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, h4, p, li, .table-scroll, figure, .focus-box, footer';
+  var JOIN_CHILDREN = '.lifecycle li, .memo .cell, .callout';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches(JOIN_CHILDREN)){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
     var chunks = [];
-    lines.forEach(function(line){
-      if (line.length <= 220) { chunks.push(line); return; }
-      var sentences = line.match(/[^.!?]+[.!?]+(\s|$)/g) || [line];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
       var buf = '';
       sentences.forEach(function(s){
-        if ((buf + s).length > 220 && buf) { chunks.push(buf.trim()); buf = s; }
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
         else buf += s;
       });
       if (buf.trim()) chunks.push(buf.trim());
@@ -559,7 +607,7 @@
     }
     if (!queue.length){
       var el = document.querySelector('.wrap') || document.body;
-      queue = splitText(el.innerText || el.textContent || '');
+      queue = buildSpeechQueue(el);
       qIndex = 0;
     }
     playing = true;
