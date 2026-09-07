@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labo Intune — Windows 365</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-read: #1f7a4d;
+    --tag-read-bg: #e6f5ec;
+    --tag-write: #a15c00;
+    --tag-write-bg: #fdf1de;
+    --tag-highpriv: #b5252f;
+    --tag-highpriv-bg: #fbe7e8;
+    --tag-scope: #7b3fd6;
+    --tag-scope-bg: #f1e9fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 { font-size: 1.9rem; margin: 0 0 6px; }
+  header.title-block p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  h2 .num { color: var(--accent); margin-right: -4px; }
+  h3 { font-size: 1.05rem; margin-top: 28px; margin-bottom: 10px; color: var(--text); }
+  h4.ex-title { margin: 0 0 4px; font-size: 1.05rem; }
+  p { margin: 10px 0; }
+  .intro { color: var(--muted); font-size: 0.95rem; }
+  .exercise {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    background: var(--card-bg);
+  }
+  .exercise .ref {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
+  }
+  .goal {
+    background: var(--accent-soft);
+    border: 1px solid #c9dcfb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.93rem;
+  }
+  .goal strong { color: var(--accent); }
+  .lifecycle {
+    list-style: none;
+    margin: 14px 0;
+    padding: 0;
+    counter-reset: step;
+  }
+  .lifecycle li {
+    counter-increment: step;
+    position: relative;
+    padding: 12px 14px 12px 48px;
+    margin-bottom: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.93rem;
+  }
+  .lifecycle li::before {
+    content: counter(step);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lifecycle li strong { display: block; margin-bottom: 2px; }
+  .lifecycle li span.detail { color: var(--muted); font-size: 0.88rem; }
+  .result {
+    border-left: 3px solid var(--tag-read);
+    background: var(--tag-read-bg);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  .result strong { display: block; color: var(--tag-read); margin-bottom: 2px; }
+  .warn-box {
+    background: #fdf1de;
+    border: 1px solid #f3d9a6;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 0.9rem;
+  }
+  .warn-box strong { display: block; margin-bottom: 4px; color: var(--tag-write); }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 6px;
+  }
+  .tag-read { color: var(--tag-read); background: var(--tag-read-bg); }
+  .tag-write { color: var(--tag-write); background: var(--tag-write-bg); }
+  .tag-highpriv { color: var(--tag-highpriv); background: var(--tag-highpriv-bg); }
+  .tag-scope { color: var(--tag-scope); background: var(--tag-scope-bg); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .table-scroll { overflow-x: auto; }
+  .note { font-size: 0.9rem; color: var(--muted); border-left: 3px solid var(--border); padding: 8px 14px; margin: 14px 0; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .exercise code { background: var(--bg); }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p style="margin:0 0 20px;font-size:0.85rem;">
+    <a href="index.html" style="color:var(--muted);text-decoration:none;">← Accueil</a>
+    <span style="color:var(--border);"> · </span>
+    <a href="intune-windows-365.html" style="color:var(--muted);text-decoration:none;">← Fiche de cours : Windows 365</a>
+  </p>
+
+  <header class="title-block">
+    <h1>Labo Intune — Windows 365</h1>
+    <p>Mise en pratique du chapitre « Windows 365 » sur un tenant réel</p>
+  </header>
+
+  <p class="intro">Scénario : vous provisionnez un premier Cloud PC pilote pour un utilisateur test, en suivant exactement le point de convergence du chapitre — la stratégie de provisionnement. Si votre tenant ne dispose d'aucune licence Windows 365, traitez tous les exercices en observation : le but est de savoir où se trouve chaque réglage et ce qu'il détermine, pas nécessairement de faire naître un Cloud PC réel.</p>
+
+  <div class="warn-box">
+    <strong>Prérequis à vérifier avant de commencer</strong>
+    Une licence Windows 365 (Business ou Enterprise) assignée à au moins un compte de test est nécessaire pour aller jusqu'au bout des exercices 2 à 5. Sans elle, vous pouvez tout de même explorer les menus et comprendre chaque réglage. Tenant utilisé&nbsp;: <code>NextstepPRO.onmicrosoft.com</code> (ou votre tenant de pratique).
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 2 — Deux familles de licence</span>
+    <h4 class="ex-title">Exercice 1 — Identifier les licences Windows 365 disponibles <span class="tag tag-read">Lecture</span></h4>
+    <div class="goal"><strong>But :</strong> savoir, pour votre propre tenant, quelle famille de licence est disponible avant de construire une stratégie de provisionnement qui la référence.</div>
+    <ol class="lifecycle">
+      <li><strong>Microsoft 365 admin center → Billing → Licenses</strong><span class="detail">Recherchez « Windows 365 » dans la liste — notez s'il s'agit d'Enterprise, de Frontline Dedicated, ou de Frontline Shared.</span></li>
+      <li><strong>Assigner une licence à un compte de test</strong><span class="detail">Si vous en avez une disponible, assignez-la à un utilisateur de test (ex. <code>test.helpdesk1</code> si vous avez fait le labo RBAC).</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>Vous savez dire quelle famille de licence Windows 365 votre tenant possède, et un compte de test en dispose (ou vous documentez clairement l'absence de licence pour la suite du labo).</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 4 — Les images</span>
+    <h4 class="ex-title">Exercice 2 — Repérer les images disponibles <span class="tag tag-read">Lecture</span></h4>
+    <div class="goal"><strong>But :</strong> distinguer une image de la galerie d'une image personnalisée avant de construire la stratégie de provisionnement.</div>
+    <ol class="lifecycle">
+      <li><strong>Devices → Windows 365 → Device images</strong><span class="detail">Consultez la liste des images de galerie proposées par Microsoft (mises à jour mensuellement).</span></li>
+      <li><strong>Add → Custom image</strong><span class="detail">Sans forcément aller au bout : repérez que l'assistant demande une source Azure (VHD ou capture de VM) et rappelle les contraintes — Génération 2, généralisée via Sysprep, jamais jointe au préalable.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>Vous pouvez citer au moins une image de galerie disponible dans votre tenant, et expliquer en une phrase pourquoi une image personnalisée doit être un socle neutre.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 5 — La stratégie de provisionnement</span>
+    <h4 class="ex-title">Exercice 3 — Créer une stratégie de provisionnement <span class="tag tag-write">Provisionnement</span></h4>
+    <div class="goal"><strong>But :</strong> construire le point de convergence du chapitre — l'endroit unique où licence, jointure, réseau et image se rencontrent.</div>
+    <ol class="lifecycle">
+      <li><strong>Devices → Windows 365 → Provisioning policies → Create policy</strong><span class="detail">Nom : <code>PROV-Cloud-PC-Pilote</code>.</span></li>
+      <li><strong>Join type</strong><span class="detail">Microsoft Entra join — le plus simple pour un premier essai.</span></li>
+      <li><strong>Network</strong><span class="detail">Microsoft hosted network — aucune configuration réseau préalable requise.</span></li>
+      <li><strong>Image</strong><span class="detail">Sélectionnez une image de galerie repérée à l'exercice 2 (avec Microsoft 365 Apps préinstallé).</span></li>
+      <li><strong>Configuration</strong><span class="detail">Langue/région, et laissez le modèle de nommage par défaut (<code>%USERNAME:X%</code>).</span></li>
+      <li><strong>Assignments</strong><span class="detail">Assignez au groupe contenant votre compte de test licencié.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>La stratégie apparaît dans Provisioning policies. Si un utilisateur licencié est dans le groupe assigné, un Cloud PC commence à se provisionner automatiquement, visible dans Devices → All devices sous quelques minutes à quelques heures.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 3 — Le réseau</span>
+    <h4 class="ex-title">Exercice 4 — Comparer les deux modèles réseau <span class="tag tag-scope">Observation</span></h4>
+    <div class="goal"><strong>But :</strong> comprendre l'arbitrage central du chapitre entre simplicité et intégration réseau, sans nécessairement construire une connexion réseau Azure complète.</div>
+    <ol class="lifecycle">
+      <li><strong>Devices → Windows 365 → Azure network connection</strong><span class="detail">Ouvrez Add → repérez les champs demandés : abonnement Azure, réseau virtuel (VNet), sous-réseau.</span></li>
+      <li><strong>Comparer avec le réseau hébergé</strong><span class="detail">Revenez à la stratégie de provisionnement de l'exercice 3 : le choix « Microsoft hosted network » ne demande aucun de ces champs.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>Vous savez expliquer pourquoi seule la connexion réseau Azure permet l'Entra Hybrid Join et l'accès aux ressources internes, au prix d'une configuration réseau préalable.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 6 — Trois extensions matérielles</span>
+    <h4 class="ex-title">Exercice 5 — Repérer le prérequis Autopilot de Windows 365 Boot <span class="tag tag-read">Lecture</span></h4>
+    <div class="goal"><strong>But :</strong> vérifier le seul point de contact explicite entre ce chapitre et celui sur Windows Autopilot.</div>
+    <ol class="lifecycle">
+      <li><strong>Devices → Windows 365 → Device images / Windows 365 Boot</strong><span class="detail">Repérez la mention exigeant que la machine physique soit enregistrée dans le service Windows Autopilot et ajoutée à un groupe Entra dédié.</span></li>
+      <li><strong>Croiser avec Windows Autopilot</strong><span class="detail">Devices → Enrollment → Windows Autopilot devices : si vous avez fait le labo Autopilot, retrouvez-y un appareil enregistré éligible.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>Vous savez expliquer pourquoi un PC physique « anonyme », jamais enregistré dans Autopilot, ne peut pas démarrer directement dans son Cloud PC via Windows 365 Boot.</div>
+  </div>
+
+  <h2><span class="num">✓</span>Nettoyage</h2>
+  <p>Avant de refermer le labo, supprimez les objets créés — sinon ils polluent le tenant pour les prochaines sessions.</p>
+  <div class="table-scroll" data-speech="Avant de refermer le labo, supprimez la stratégie de provisionnement PROV-Cloud-PC-Pilote, ce qui désapprovisionne le Cloud PC associé, retirez la licence Windows 365 du compte de test si elle a été assignée uniquement pour le labo, et supprimez la connexion réseau Azure si vous en avez créé une.">
+  <table>
+    <thead><tr><th>Objet</th><th>Emplacement</th></tr></thead>
+    <tbody>
+      <tr><td><code>PROV-Cloud-PC-Pilote</code></td><td>Devices → Windows 365 → Provisioning policies</td></tr>
+      <tr><td>Licence Windows 365 du compte de test</td><td>Microsoft 365 admin center → Users → (compte) → Licenses</td></tr>
+      <tr><td>Connexion réseau Azure (si créée)</td><td>Devices → Windows 365 → Azure network connection</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2><span class="num">📋</span>Checklist de validation</h2>
+  <div class="table-scroll" data-speech="La checklist de validation reprend les cinq étapes du labo, licence Windows 365 identifiée, images repérées, stratégie de provisionnement créée et assignée, modèles réseau comparés, prérequis Autopilot de Windows 365 Boot repéré, et enfin le nettoyage.">
+  <table>
+    <thead><tr><th>#</th><th>Exercice</th><th>Fait ?</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Licence Windows 365 identifiée</td><td>☐</td></tr>
+      <tr><td>2</td><td>Images de galerie / personnalisée repérées</td><td>☐</td></tr>
+      <tr><td>3</td><td>Stratégie de provisionnement créée et assignée</td><td>☐</td></tr>
+      <tr><td>4</td><td>Modèles réseau comparés (hébergé vs Azure)</td><td>☐</td></tr>
+      <tr><td>5</td><td>Prérequis Autopilot de Windows 365 Boot repéré</td><td>☐</td></tr>
+      <tr><td>6</td><td>Nettoyage effectué</td><td>☐</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <footer>
+    Labo pratique construit sur la fiche « Windows 365 ». À faire sur un tenant de test, jamais en production.
+  </footer>
+
+</div>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .ref, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, h4, p, li, .table-scroll, figure, .warn-box, .goal, .result, footer';
+  var JOIN_CHILDREN = '.lifecycle li';
+  var GLUED_LABEL = '.result, .warn-box';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches(GLUED_LABEL)){
+      clone.querySelectorAll('strong').forEach(function(s){
+        var next = s.nextSibling;
+        if (next && next.nodeType === 3 && next.textContent && !/^\s/.test(next.textContent)){
+          next.textContent = '. ' + next.textContent;
+        }
+      });
+      return normalizeSpeech(clone.textContent);
+    }
+    if (el.matches(JOIN_CHILDREN)){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
+    var chunks = [];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = buildSpeechQueue(el);
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>
+</body>
+</html>

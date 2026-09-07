@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labo Intune — Sécurité et conformité</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1f2430;
+    --muted: #5b6472;
+    --accent: #2f6fed;
+    --accent-soft: #eaf1ff;
+    --border: #e3e7ee;
+    --card-bg: #f8f9fb;
+    --tag-read: #1f7a4d;
+    --tag-read-bg: #e6f5ec;
+    --tag-write: #a15c00;
+    --tag-write-bg: #fdf1de;
+    --tag-highpriv: #b5252f;
+    --tag-highpriv-bg: #fbe7e8;
+    --tag-scope: #7b3fd6;
+    --tag-scope-bg: #f1e9fc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 48px 24px 96px; }
+  header.title-block {
+    margin-bottom: 40px;
+    border-bottom: 3px solid var(--accent);
+    padding-bottom: 20px;
+  }
+  header.title-block h1 { font-size: 1.9rem; margin: 0 0 6px; }
+  header.title-block p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  h2 {
+    font-size: 1.35rem;
+    margin-top: 52px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  h2 .num { color: var(--accent); margin-right: -4px; }
+  h3 { font-size: 1.05rem; margin-top: 28px; margin-bottom: 10px; color: var(--text); }
+  h4.ex-title { margin: 0 0 4px; font-size: 1.05rem; }
+  p { margin: 10px 0; }
+  .intro { color: var(--muted); font-size: 0.95rem; }
+  .exercise {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    background: var(--card-bg);
+  }
+  .exercise .ref {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 6px;
+  }
+  .goal {
+    background: var(--accent-soft);
+    border: 1px solid #c9dcfb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.93rem;
+  }
+  .goal strong { color: var(--accent); }
+  .lifecycle {
+    list-style: none;
+    margin: 14px 0;
+    padding: 0;
+    counter-reset: step;
+  }
+  .lifecycle li {
+    counter-increment: step;
+    position: relative;
+    padding: 12px 14px 12px 48px;
+    margin-bottom: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.93rem;
+  }
+  .lifecycle li::before {
+    content: counter(step);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lifecycle li strong { display: block; margin-bottom: 2px; }
+  .lifecycle li span.detail { color: var(--muted); font-size: 0.88rem; }
+  .result {
+    border-left: 3px solid var(--tag-read);
+    background: var(--tag-read-bg);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  .result strong { display: block; color: var(--tag-read); margin-bottom: 2px; }
+  .warn-box {
+    background: #fdf1de;
+    border: 1px solid #f3d9a6;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-size: 0.9rem;
+  }
+  .warn-box strong { display: block; margin-bottom: 4px; color: var(--tag-write); }
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: 6px;
+  }
+  .tag-read { color: var(--tag-read); background: var(--tag-read-bg); }
+  .tag-write { color: var(--tag-write); background: var(--tag-write-bg); }
+  .tag-highpriv { color: var(--tag-highpriv); background: var(--tag-highpriv-bg); }
+  .tag-scope { color: var(--tag-scope); background: var(--tag-scope-bg); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .table-scroll { overflow-x: auto; }
+  .note { font-size: 0.9rem; color: var(--muted); border-left: 3px solid var(--border); padding: 8px 14px; margin: 14px 0; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.85rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .exercise code { background: var(--bg); }
+  .code-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 10px 0;
+    overflow-x: auto;
+    white-space: pre;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.82rem;
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p style="margin:0 0 20px;font-size:0.85rem;">
+    <a href="index.html" style="color:var(--muted);text-decoration:none;">← Accueil</a>
+    <span style="color:var(--border);"> · </span>
+    <a href="intune-securite-conformite.html" style="color:var(--muted);text-decoration:none;">← Fiche de cours : Sécurité et conformité des appareils</a>
+  </p>
+
+  <header class="title-block">
+    <h1>Labo Intune — Sécurité et conformité</h1>
+    <p>Mise en pratique du fil conducteur « Protéger → Vérifier → Contrôler » sur un tenant réel</p>
+  </header>
+
+  <p class="intro">Scénario : vous équipez un groupe pilote « Marketing » du triptyque complet — une stratégie qui protège les postes, une stratégie qui vérifie leur état, et une règle d'accès conditionnel qui exploite ce résultat. Chaque exercice reprend un étage précis de la fiche de cours, dans l'ordre où elle les présente.</p>
+
+  <div class="warn-box">
+    <strong>Prérequis à vérifier avant de commencer</strong>
+    Licence Intune Plan 1 sur votre compte admin. L'exercice 4 (accès conditionnel) nécessite <strong>Entra ID P1</strong> ou supérieur — si vous ne l'avez pas, traitez-le en observation. Un appareil Windows géré est utile pour observer l'effet des exercices 1 et 2, mais pas indispensable pour les créer. Tenant utilisé&nbsp;: <code>NextstepPRO.onmicrosoft.com</code> (ou votre tenant de pratique).
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 5 — Étage Protéger : ordinateurs et serveurs</span>
+    <h4 class="ex-title">Exercice 1 — Créer une stratégie Antivirus <span class="tag tag-write">Protéger</span></h4>
+    <div class="goal"><strong>But :</strong> matérialiser l'étage « Protéger » avec la brique la plus réactive du chapitre — l'antivirus.</div>
+    <ol class="lifecycle">
+      <li><strong>Endpoint Security → Antivirus → Create policy</strong><span class="detail">Plateforme : Windows 10, 10.1, and later. Profil : Microsoft Defender Antivirus.</span></li>
+      <li><strong>Configurer les paramètres clés</strong><span class="detail">Activez la protection en temps réel (Real-time protection), la protection cloud (Cloud protection) et les analyses planifiées quotidiennes.</span></li>
+      <li><strong>Nommer et assigner</strong><span class="detail">Nom : <code>AV-Windows-Marketing</code>. Assignez à un groupe de test contenant un ou plusieurs postes Windows.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>La stratégie apparaît dans Endpoint Security → Antivirus avec un statut de déploiement. Sur un appareil cible déjà synchronisé, la protection en temps réel doit apparaître active dans Sécurité Windows.</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 7 — Étage Vérifier : conformité des appareils</span>
+    <h4 class="ex-title">Exercice 2 — Créer une stratégie de conformité Windows <span class="tag tag-write">Vérifier</span></h4>
+    <div class="goal"><strong>But :</strong> construire le référentiel qui définit « conforme » pour votre organisation — l'étage Vérifier ne fonctionne que s'il existe une stratégie à évaluer.</div>
+    <ol class="lifecycle">
+      <li><strong>Devices → Compliance → Policies → Create policy</strong><span class="detail">Plateforme : Windows 10 and later.</span></li>
+      <li><strong>Device Health</strong><span class="detail">Activez le chiffrement (BitLocker) requis.</span></li>
+      <li><strong>System Security</strong><span class="detail">Exigez un mot de passe, une longueur minimale de 6 caractères, et le firewall actif.</span></li>
+      <li><strong>Actions for noncompliance</strong><span class="detail">Ajoutez une action « Send email to end user » à 0 jour, et « Mark device noncompliant » à 3 jours de grâce.</span></li>
+      <li><strong>Nommer et assigner</strong><span class="detail">Nom : <code>COMP-Windows-Marketing</code>. Assignez au même groupe de test.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>La stratégie apparaît dans Devices → Compliance → Policies. Sur un appareil cible, l'onglet Device compliance affiche désormais un statut (Compliant / Not compliant) au lieu de « Not evaluated ».</div>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 7 — Étage Vérifier : scripts de conformité personnalisée</span>
+    <h4 class="ex-title">Exercice 3 — Écrire un script de conformité personnalisée <span class="tag tag-scope">Vérifier (avancé)</span></h4>
+    <div class="goal"><strong>But :</strong> vérifier un paramètre que les stratégies de conformité standard ne couvrent pas — exactement le cas d'usage du chapitre.</div>
+    <ol class="lifecycle">
+      <li><strong>Préparer le script de découverte</strong><span class="detail">Créez un fichier PowerShell qui renvoie un JSON, par exemple la version du BIOS de la machine.</span></li>
+      <li><strong>Préparer le fichier de règles JSON</strong><span class="detail">Un second fichier qui définit l'opérateur de comparaison attendu (voir extraits ci-dessous, repris du cours).</span></li>
+      <li><strong>Endpoint Security → Device Compliance → Scripts → Add</strong><span class="detail">Importez le script PowerShell.</span></li>
+      <li><strong>Créer une stratégie de conformité personnalisée</strong><span class="detail">Devices → Compliance → Policies → Create policy → Compliance settings → Custom compliance → sélectionnez le script importé et le fichier JSON associé.</span></li>
+    </ol>
+    <div class="code-block">$hash = @{ Manufacturer = $WMI_ComputerSystem.Manufacturer; BiosVersion = $WMI_BIOS.SMBIOSBIOSVersion }
+return $hash | ConvertTo-Json -Compress</div>
+    <div class="code-block">{ "SettingName":"BiosVersion", "Operator":"GreaterEquals", "DataType":"Version", "Operand":"2.3" }</div>
+    <div class="result"><strong>Résultat attendu</strong>La stratégie personnalisée apparaît dans Devices → Compliance → Policies, avec le script associé visible dans son résumé — vous savez désormais construire une règle que Microsoft ne propose pas nativement.</div>
+    <p class="note">Rappel du cours : limite de 100&nbsp;Ko et 100 règles par fichier JSON.</p>
+  </div>
+
+  <div class="exercise">
+    <span class="ref">Cours § 8 — Étage Contrôler : accès conditionnel</span>
+    <h4 class="ex-title">Exercice 4 — Bloquer l'accès aux appareils non conformes <span class="tag tag-highpriv">Contrôler</span></h4>
+    <div class="goal"><strong>But :</strong> fermer la boucle du triptyque en exploitant le résultat de l'étage Vérifier comme condition d'accès aux ressources — Zero Trust en pratique.</div>
+    <ol class="lifecycle">
+      <li><strong>Entra ID admin center → Protection → Conditional Access → Create new policy</strong><span class="detail">Nom : <code>CA-Compliant-Only-Marketing</code>.</span></li>
+      <li><strong>Users</strong><span class="detail">Ciblez votre groupe de test uniquement (jamais « All users » en premier test).</span></li>
+      <li><strong>Target resources</strong><span class="detail">Sélectionnez une application cloud, par exemple Office 365 Exchange Online.</span></li>
+      <li><strong>Grant</strong><span class="detail">Grant access → cochez « Require device to be marked as compliant ».</span></li>
+      <li><strong>Enable policy</strong><span class="detail">Laissez en <em>Report-only</em> pour un premier test sans risque de blocage réel, puis basculez en <em>On</em> une fois validé.</span></li>
+    </ol>
+    <div class="result"><strong>Résultat attendu</strong>La politique apparaît dans Conditional Access → Policies. En mode Report-only, Entra ID → Sign-in logs montre les évaluations sans bloquer réellement les connexions — c'est la façon sûre de tester avant activation.</div>
+  </div>
+
+  <h2><span class="num">✓</span>Nettoyage</h2>
+  <p>Avant de refermer le labo, supprimez ou désactivez les objets créés — sinon ils polluent le tenant pour les prochaines sessions.</p>
+  <div class="table-scroll" data-speech="Avant de refermer le labo, supprimez la stratégie antivirus AV-Windows-Marketing, la stratégie de conformité COMP-Windows-Marketing, la stratégie de conformité personnalisée et son script, et désactivez ou supprimez la politique d'accès conditionnel CA-Compliant-Only-Marketing.">
+  <table>
+    <thead><tr><th>Objet</th><th>Emplacement</th></tr></thead>
+    <tbody>
+      <tr><td><code>AV-Windows-Marketing</code></td><td>Endpoint Security → Antivirus</td></tr>
+      <tr><td><code>COMP-Windows-Marketing</code></td><td>Devices → Compliance → Policies</td></tr>
+      <tr><td>Stratégie de conformité personnalisée + script</td><td>Devices → Compliance → Policies · Endpoint Security → Device Compliance → Scripts</td></tr>
+      <tr><td><code>CA-Compliant-Only-Marketing</code></td><td>Entra ID admin center → Protection → Conditional Access</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2><span class="num">📋</span>Checklist de validation</h2>
+  <div class="table-scroll" data-speech="La checklist de validation reprend les quatre étapes du labo, stratégie antivirus créée, stratégie de conformité créée, script de conformité personnalisée écrit et importé, politique d'accès conditionnel créée en mode rapport seul, et enfin le nettoyage.">
+  <table>
+    <thead><tr><th>#</th><th>Exercice</th><th>Fait ?</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Stratégie Antivirus créée et assignée</td><td>☐</td></tr>
+      <tr><td>2</td><td>Stratégie de conformité Windows créée et assignée</td><td>☐</td></tr>
+      <tr><td>3</td><td>Script de conformité personnalisée écrit et importé</td><td>☐</td></tr>
+      <tr><td>4</td><td>Politique d'accès conditionnel créée (Report-only ou On)</td><td>☐</td></tr>
+      <tr><td>5</td><td>Nettoyage effectué</td><td>☐</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <footer>
+    Labo pratique construit sur la fiche « Sécurité et conformité des appareils ». À faire sur un tenant de test, jamais en production.
+  </footer>
+
+</div>
+
+<div id="pwgate-overlay" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <form id="pwgate-form" style="text-align:center;padding:24px;max-width:320px;width:100%;">
+    <p style="font-size:1rem;color:#1f2430;margin:0 0 12px;">Accès protégé</p>
+    <input id="pwgate-input" type="password" placeholder="Mot de passe" autocomplete="off" style="padding:10px 12px;border:1px solid #e3e7ee;border-radius:8px;font-size:1rem;width:100%;box-sizing:border-box;">
+    <button type="submit" style="margin-top:10px;padding:10px 16px;border:none;border-radius:8px;background:#2f6fed;color:#fff;font-weight:600;font-size:0.95rem;width:100%;cursor:pointer;">Entrer</button>
+    <p id="pwgate-error" style="color:#c0392b;font-size:0.85rem;margin-top:8px;display:none;">Mot de passe incorrect</p>
+  </form>
+</div>
+<script>
+(function(){
+  var KEY = 'intune_notes_unlocked_v1';
+  var PASS = 'intune2026';
+  var overlay = document.getElementById('pwgate-overlay');
+  if (localStorage.getItem(KEY) === '1') {
+    overlay.style.display = 'none';
+  }
+  document.getElementById('pwgate-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var val = document.getElementById('pwgate-input').value;
+    if (val === PASS) {
+      localStorage.setItem(KEY, '1');
+      overlay.style.display = 'none';
+    } else {
+      document.getElementById('pwgate-error').style.display = 'block';
+    }
+  });
+})();
+</script>
+
+<div id="reader-bar" style="position:fixed;left:0;right:0;bottom:0;z-index:9998;display:none;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--card-bg, var(--surface, #f8f9fb));border-top:1px solid var(--border, #e3e7ee);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.08);">
+  <button id="reader-toggle" type="button" aria-label="Lecture" style="width:44px;height:44px;flex:none;border:none;border-radius:50%;background:var(--accent, #2f6fed);color:#fff;font-size:1.1rem;cursor:pointer;">▶</button>
+  <button id="reader-stop" type="button" aria-label="Arrêter" style="width:38px;height:38px;flex:none;border:1px solid var(--border, #e3e7ee);border-radius:50%;background:transparent;color:var(--text, #1f2430);font-size:0.95rem;cursor:pointer;">⏹</button>
+  <div style="flex:1;min-width:0;">
+    <div id="reader-status" style="font-size:0.82rem;color:var(--muted, var(--text-2, #5b6472));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Écouter cette page</div>
+    <div style="height:3px;background:var(--border, #e3e7ee);border-radius:2px;margin-top:4px;overflow:hidden;">
+      <div id="reader-progress" style="height:100%;width:0%;background:var(--accent, #2f6fed);"></div>
+    </div>
+  </div>
+  <select id="reader-rate" aria-label="Vitesse de lecture" style="flex:none;border:1px solid var(--border, #e3e7ee);border-radius:6px;background:var(--bg, #fff);color:var(--text, #1f2430);font-size:0.82rem;padding:6px 4px;">
+    <option value="0.75">0.75×</option>
+    <option value="1" selected>1×</option>
+    <option value="1.25">1.25×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2">2×</option>
+  </select>
+</div>
+<script>
+(function(){
+  if (!('speechSynthesis' in window)) return;
+  var synth = window.speechSynthesis;
+  var bar = document.getElementById('reader-bar');
+  var toggleBtn = document.getElementById('reader-toggle');
+  var stopBtn = document.getElementById('reader-stop');
+  var statusEl = document.getElementById('reader-status');
+  var progressEl = document.getElementById('reader-progress');
+  var rateSelect = document.getElementById('reader-rate');
+  bar.style.display = 'flex';
+  document.body.style.paddingBottom = '78px';
+
+  var voice = null;
+  function pickVoice(){
+    var voices = synth.getVoices();
+    voice = voices.filter(function(v){ return /^fr/i.test(v.lang); })[0] || voices[0] || null;
+  }
+  pickVoice();
+  if ('onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  var SKIP_DECOR = '.num, .eyebrow, .tag, .lbl, .ref, .step, .arrow, .backlink, code, script, style, sup';
+  var BLOCK_SELECTOR = 'h1, h2, h3, h4, p, li, .table-scroll, figure, .warn-box, .goal, .result, footer';
+  var JOIN_CHILDREN = '.lifecycle li';
+  var GLUED_LABEL = '.result, .warn-box';
+
+  function normalizeSpeech(text){
+    return text
+      .replace(/[«»]/g, '')
+      .replace(/\s*→\s*/g, ', puis ')
+      .replace(/\s*↔\s*/g, ' et ')
+      .replace(/\s*—\s*/g, ', ')
+      .replace(/\s*\/\s*/g, ', ')
+      .replace(/\s*:\s*/g, ', ')
+      .replace(/\s*=\s*/g, ' signifie ')
+      .replace(/\bvs\b/gi, 'contre')
+      .replace(/%/g, ' pour cent')
+      .replace(/\(\s*,?\s*\)/g, '')
+      .replace(/,(\s*,)+/g, ',')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechOf(el){
+    if (el.hasAttribute('data-speech')) return normalizeSpeech(el.getAttribute('data-speech'));
+    if (el.tagName === 'FIGURE'){
+      var svgEl = el.querySelector('svg[aria-label]');
+      if (svgEl) return normalizeSpeech(svgEl.getAttribute('aria-label'));
+      var cap = el.querySelector('figcaption');
+      return cap ? normalizeSpeech(cap.textContent) : '';
+    }
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll(SKIP_DECOR).forEach(function(n){ n.remove(); });
+    if (el.matches(GLUED_LABEL)){
+      clone.querySelectorAll('strong').forEach(function(s){
+        var next = s.nextSibling;
+        if (next && next.nodeType === 3 && next.textContent && !/^\s/.test(next.textContent)){
+          next.textContent = '. ' + next.textContent;
+        }
+      });
+      return normalizeSpeech(clone.textContent);
+    }
+    if (el.matches(JOIN_CHILDREN)){
+      var parts = Array.from(clone.children).map(function(c){ return c.textContent.trim(); }).filter(Boolean);
+      if (parts.length) return normalizeSpeech(parts.join('. '));
+    }
+    return normalizeSpeech(clone.textContent);
+  }
+
+  function buildSpeechQueue(root){
+    var all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
+    var blocks = all.filter(function(el){
+      var parent = el.parentElement;
+      while (parent && parent !== root){
+        if (all.indexOf(parent) !== -1) return false;
+        parent = parent.parentElement;
+      }
+      return true;
+    });
+    var chunks = [];
+    blocks.forEach(function(el){
+      var text = speechOf(el);
+      if (!text) return;
+      if (text.length <= 260) { chunks.push(text); return; }
+      var sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [text];
+      var buf = '';
+      sentences.forEach(function(s){
+        if ((buf + s).length > 260 && buf) { chunks.push(buf.trim()); buf = s; }
+        else buf += s;
+      });
+      if (buf.trim()) chunks.push(buf.trim());
+    });
+    return chunks;
+  }
+
+  var queue = [];
+  var qIndex = 0;
+  var playing = false;
+
+  function updateUI(){
+    toggleBtn.textContent = playing ? '⏸' : '▶';
+    toggleBtn.setAttribute('aria-label', playing ? 'Pause' : 'Lecture');
+    if (queue.length){
+      statusEl.textContent = 'Passage ' + Math.min(qIndex + 1, queue.length) + ' / ' + queue.length;
+      progressEl.style.width = Math.round((qIndex / queue.length) * 100) + '%';
+    } else {
+      statusEl.textContent = 'Écouter cette page';
+      progressEl.style.width = '0%';
+    }
+  }
+
+  function speakNext(){
+    if (qIndex >= queue.length){
+      playing = false;
+      updateUI();
+      return;
+    }
+    var utter = new SpeechSynthesisUtterance(queue[qIndex]);
+    utter.lang = 'fr-FR';
+    if (voice) utter.voice = voice;
+    utter.rate = parseFloat(rateSelect.value) || 1;
+    utter.onend = function(){ qIndex++; updateUI(); speakNext(); };
+    utter.onerror = function(){ qIndex++; speakNext(); };
+    synth.speak(utter);
+  }
+
+  function play(){
+    if (synth.paused && queue.length){
+      synth.resume();
+      playing = true;
+      updateUI();
+      return;
+    }
+    if (!queue.length){
+      var el = document.querySelector('.wrap') || document.body;
+      queue = buildSpeechQueue(el);
+      qIndex = 0;
+    }
+    playing = true;
+    updateUI();
+    speakNext();
+  }
+  function pauseReading(){
+    synth.pause();
+    playing = false;
+    updateUI();
+  }
+  function stopReading(){
+    synth.cancel();
+    queue = [];
+    qIndex = 0;
+    playing = false;
+    updateUI();
+  }
+
+  toggleBtn.addEventListener('click', function(){
+    if (playing) pauseReading(); else play();
+  });
+  stopBtn.addEventListener('click', stopReading);
+  rateSelect.addEventListener('change', function(){
+    if (queue.length && (playing || synth.paused)){
+      var resume = playing;
+      synth.cancel();
+      if (resume) { playing = true; speakNext(); }
+      else { updateUI(); }
+    }
+  });
+  window.addEventListener('pagehide', function(){ synth.cancel(); });
+})();
+</script>
+</body>
+</html>
